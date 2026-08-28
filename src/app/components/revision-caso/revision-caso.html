@@ -1,0 +1,272 @@
+<div class="revision-container">
+
+  <!-- CABECERA DE LA REVISIÓN -->
+
+  <div class="revision-header">
+
+    <div>
+      <span class="eyebrow">
+        PASO 5 DE 5
+      </span>
+
+      <h2>
+        Revisión del documento
+      </h2>
+
+      <p>
+        Revisa cómo quedará el escrito antes de generar el documento Word.
+      </p>
+    </div>
+
+    <div class="revision-status">
+      <span class="status-dot"></span>
+      Vista previa
+    </div>
+
+  </div>
+
+
+  <!-- DOCUMENTO -->
+
+  <div class="document-wrapper">
+
+    <article class="legal-document">
+
+
+      <!-- ENCABEZADO DEL DOCUMENTO -->
+
+      <header class="document-header">
+
+        <div class="logo-placeholder">
+          JUÁREZ
+        </div>
+
+        <div class="institution">
+
+          <strong>
+            PRESIDENCIA MUNICIPAL DE JUÁREZ, N.L.
+          </strong>
+
+          <span>
+            ADMINISTRACIÓN MUNICIPAL
+          </span>
+
+        </div>
+
+        <div class="logo-placeholder women">
+          MUJERES
+        </div>
+
+      </header>
+
+
+      <!-- DESTINATARIO -->
+
+      <section class="document-section recipient">
+
+        <p>
+          AL C. JUEZ DE JUICIO FAMILIAR ORAL DEL QUINTO
+          DISTRITO JUDICIAL EN EL ESTADO DE NUEVO LEÓN.
+        </p>
+
+        <p>
+          P R E S E N T E.-
+        </p>
+
+      </section>
+
+
+      <!-- PRIMER PÁRRAFO -->
+
+      <section class="document-body">
+
+        <p>
+
+          <span class="dynamic-value">
+            {{ caso.demandante.nombre }}
+          </span>,
+
+          mexicana,
+
+          <span class="dynamic-value">
+            {{ caso.demandante.edad }}
+          </span>
+
+          años de edad,
+
+          soltera,
+
+          <span class="dynamic-value">
+            {{ caso.demandante.ocupacion }}
+          </span>,
+
+          con domicilio convencional para oír y recibir
+          notificaciones el ubicado en la calle
+
+          <span class="dynamic-value">
+            {{ caso.demandante.direccion }}
+          </span>;
+
+          ante Usted y con el debido respeto comparezco
+          y expongo:
+
+        </p>
+
+
+        <!-- SEGUNDO PÁRRAFO -->
+
+        <p>
+
+          Por medio del presente escrito en representación
+          de mis menores hijos
+
+          <span class="dynamic-value">
+
+            @for (hijo of caso.hijos; track $index) {
+
+              {{ hijo.nombre }}
+
+              @if (!$last) {
+                ,
+              }
+
+            }
+
+          </span>
+
+          quienes viven con la suscrita en el domicilio
+          ubicado en la calle
+
+          <span class="dynamic-value">
+            {{ caso.demandante.direccion }}
+          </span>,
+
+          con fundamento en los artículos 1068, 1069,
+          1070 y demás relativos del Código de
+          Procedimientos Civiles Vigente en el Estado,
+
+          ocurro en tiempo y forma legal a efecto de
+          promover
+
+          <strong class="dynamic-value">
+            JUICIO ORAL DE ALIMENTOS
+          </strong>
+
+          en contra del señor
+
+          <span class="dynamic-value">
+            {{ caso.demandado.nombre }}
+          </span>,
+
+          quien puede ser emplazado en su domicilio
+          ubicado en
+
+          <span class="dynamic-value">
+            {{ caso.demandado.direccion }}
+          </span>,
+
+          lugar en el cual solicito le sea notificada
+          la presente demanda, reclamándole las
+          siguientes:
+
+        </p>
+
+
+        <!-- SECCIÓN DE PRETENSIONES -->
+
+        <h3 class="document-title">
+          P R E S T A C I O N E S
+        </h3>
+
+
+        <ol class="claims">
+
+          <li>
+            El pago y aseguramiento de una pensión
+            alimenticia en favor de los menores.
+          </li>
+
+          <li>
+            El pago de las prestaciones derivadas
+            de la obligación alimentaria.
+          </li>
+
+        </ol>
+
+
+        <!-- INFORMACIÓN DEL CASO -->
+
+        <div class="case-summary">
+
+          <h3>
+            Información del expediente
+          </h3>
+
+          <div class="case-row">
+
+            <span>
+              Expediente
+            </span>
+
+            <strong>
+              {{ caso.numeroExpediente || 'Sin asignar' }}
+            </strong>
+
+          </div>
+
+          <div class="case-row">
+
+            <span>
+              Abogada
+            </span>
+
+            <strong>
+              {{ caso.abogado.nombre }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+      </section>
+
+
+    </article>
+
+  </div>
+
+
+  <!-- ACCIONES -->
+
+  <div class="revision-actions">
+
+    <button
+      type="button"
+      class="secondary-button">
+
+      ← Volver a editar
+
+    </button>
+
+
+    <div class="action-right">
+
+      <span class="revision-help">
+        Verifica los datos antes de generar el documento.
+      </span>
+
+      <button
+        type="button"
+        class="primary-button">
+
+        Generar documento Word
+        <span>→</span>
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

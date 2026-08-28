@@ -1,0 +1,17 @@
+<div class="container mt-4">
+
+    <button
+        class="btn btn-primary"
+        (click)="fileInput.click()">
+
+        Seleccionar plantilla
+
+    </button>
+
+    <input
+        #fileInput
+        type="file"
+        accept=".docx"
+        (change)="onFileSelected($event)">
+
+</div>
