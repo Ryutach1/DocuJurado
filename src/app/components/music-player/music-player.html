@@ -1,0 +1,121 @@
+<button
+  type="button"
+  class="player-toggle"
+  aria-controls="music-player-panel"
+  [attr.aria-expanded]="isOpen()"
+  [attr.aria-label]="isOpen() ? 'Cerrar reproductor de música' : 'Abrir reproductor de música'"
+  (click)="togglePlayer()">
+  <span aria-hidden="true">♫</span>
+</button>
+
+@if (isOpen()) {
+  <section id="music-player-panel" class="player-panel" aria-label="Reproductor de música">
+    <header class="player-header">
+      <div>
+        <span class="player-eyebrow">MÚSICA</span>
+        <h2>Reproductor</h2>
+      </div>
+      <button type="button" class="close-button" aria-label="Cerrar reproductor" (click)="closePlayer()">
+        <span aria-hidden="true">×</span>
+      </button>
+    </header>
+
+    <section class="spotify-account" aria-label="Reproducción desde tu cuenta de Spotify">
+      <h3>Tu Spotify</h3>
+      <p class="spotify-status" aria-live="polite">
+        {{ spotify.message() || 'Conecta Spotify para continuar tu playlist activa aquí.' }}
+      </p>
+
+      @if (spotify.status() === 'playing') {
+        <div class="spotify-account-actions">
+          <button type="button" class="apply-button" (click)="toggleSpotifyPlayback()">Reproducir / pausar</button>
+          <button type="button" class="clear-button" (click)="disconnectSpotify()">Desconectar</button>
+        </div>
+      } @else {
+        <button
+          type="button"
+          class="spotify-connect-button"
+          [disabled]="!spotifyConfigured || spotify.status() === 'authorizing' || spotify.status() === 'connecting'"
+          (click)="connectSpotify()">
+          @if (spotify.status() === 'authorizing' || spotify.status() === 'connecting') {
+            Conectando…
+          } @else {
+            Conectar con Spotify
+          }
+        </button>
+      }
+
+      @if (!spotifyConfigured) {
+        <p class="setup-note">
+          Configura el Client ID y la URI de retorno indicados en el README para habilitar Spotify.
+        </p>
+      }
+
+      <p class="privacy-note">
+        Requiere Spotify Premium para reproducir dentro de esta página. Se solicitará permiso para leer la
+        reproducción activa y controlarla; el token vive solo en memoria y el verificador PKCE se elimina al volver.
+      </p>
+    </section>
+
+    <div class="player-divider" aria-hidden="true"></div>
+
+    @if (spotify.status() !== 'playing') {
+      @if (embedUrl(); as source) {
+        <iframe
+          class="spotify-embed"
+          [src]="source"
+          title="Playlist pública de Spotify"
+          width="352"
+          height="152"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy">
+        </iframe>
+
+        @if (spotifyPageUrl(); as spotifyUrl) {
+          <a
+            class="open-spotify-link"
+            [href]="spotifyUrl"
+            target="_blank"
+            rel="noopener noreferrer">
+            Abrir en Spotify para escuchar completa
+            <span aria-hidden="true">↗</span>
+          </a>
+        }
+
+        <button type="button" class="clear-button" (click)="clearPlaylist()">
+          Quitar playlist de esta sesión
+        </button>
+      } @else {
+        <p class="empty-playlists">
+          Pega el enlace de una playlist pública de Spotify para escucharla durante esta sesión.
+        </p>
+      }
+    }
+
+    <form class="playlist-form" novalidate (submit)="$event.preventDefault(); applyPlaylist(playlistLinkInput.value)">
+      <label for="spotify-playlist-link">Enlace de playlist</label>
+      <div class="playlist-input-row">
+        <input
+          #playlistLinkInput
+          id="spotify-playlist-link"
+          type="url"
+          inputmode="url"
+          autocomplete="off"
+          placeholder="https://open.spotify.com/playlist/..."
+          [value]="playlistInput()"
+          (input)="updatePlaylistInput($event)">
+        <button type="submit" class="apply-button">Usar</button>
+      </div>
+    </form>
+
+    @if (feedback()) {
+      <p class="player-feedback" [class.error]="hasError()" aria-live="polite">
+        {{ feedback() }}
+      </p>
+    }
+
+    <p class="privacy-note">
+      La playlist pública manual sigue disponible como alternativa sin conectar una cuenta.
+    </p>
+  </section>
+}

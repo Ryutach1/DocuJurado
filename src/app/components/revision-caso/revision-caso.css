@@ -246,6 +246,67 @@
   margin-bottom: 16px;
 }
 
+.numbered-section,
+.evidence-list {
+  margin: 0 0 26px;
+  padding-left: 30px;
+}
+
+.numbered-section li,
+.evidence-list li {
+  margin-bottom: 14px;
+  padding-left: 4px;
+}
+
+.expense-table-wrapper {
+  margin: 8px 0 30px;
+  overflow-x: auto;
+}
+
+.expense-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.expense-table caption {
+  padding: 0 0 10px;
+  color: #374151;
+  font-weight: 700;
+  text-align: left;
+}
+
+.expense-table th,
+.expense-table td {
+  padding: 9px 10px;
+  border: 1px solid #d1d5db;
+}
+
+.expense-table thead {
+  background: #f3f4f6;
+}
+
+.signature {
+  margin: 55px 0 35px;
+  text-align: center;
+}
+
+.signature strong {
+  display: inline-block;
+  margin-top: 42px;
+  text-transform: uppercase;
+}
+
+.annexes ul {
+  margin: 0 0 20px;
+  padding-left: 30px;
+}
+
+.annexes li {
+  margin-bottom: 8px;
+}
+
 
 /* ================================
    RESUMEN EXPEDIENTE

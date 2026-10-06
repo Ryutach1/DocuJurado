@@ -5,6 +5,7 @@ import { DocumentLoader } from './components/document-manager/document-loader';
 import { CasoService } from './services/caso.service';
 import { Caso, Demandante, Demandado, Hijo, Gastos } from './models';
 import { RevisionCaso } from './components/revision-caso/revision-caso';
+import { MusicPlayer } from './components/music-player/music-player';
 
 
 @Component({
@@ -13,6 +14,7 @@ import { RevisionCaso } from './components/revision-caso/revision-caso';
     DocumentLoader,
     ReactiveFormsModule,
     RevisionCaso,
+    MusicPlayer,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css'
@@ -248,5 +250,4 @@ export class App {
     }
   }
 }
-
 
