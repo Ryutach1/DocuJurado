@@ -42,3 +42,6 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Local case document containing personal information
+/PA CON RELACION LABORAL.docx
