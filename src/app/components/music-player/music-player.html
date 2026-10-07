@@ -5,15 +5,28 @@
   [attr.aria-expanded]="isOpen()"
   [attr.aria-label]="isOpen() ? 'Cerrar reproductor de música' : 'Abrir reproductor de música'"
   (click)="togglePlayer()">
-  <span aria-hidden="true">♫</span>
+  <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+    <circle cx="16" cy="16" r="16" fill="currentColor"/>
+    <path d="M7.2 11.1c6.1-1.9 13.1-1.3 18.1 1.7" fill="none" stroke="#102217" stroke-linecap="round" stroke-width="2.2"/>
+    <path d="M8.5 15.3c5-1.5 10.6-1 14.8 1.5" fill="none" stroke="#102217" stroke-linecap="round" stroke-width="2"/>
+    <path d="M10 19.4c3.8-1 7.9-.6 11.1 1.3" fill="none" stroke="#102217" stroke-linecap="round" stroke-width="1.8"/>
+  </svg>
 </button>
 
 @if (isOpen()) {
   <section id="music-player-panel" class="player-panel" aria-label="Reproductor de música">
     <header class="player-header">
-      <div>
-        <span class="player-eyebrow">MÚSICA</span>
-        <h2>Reproductor</h2>
+      <div class="player-brand">
+        <svg class="spotify-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+          <circle cx="16" cy="16" r="16" fill="currentColor"/>
+          <path d="M7.2 11.1c6.1-1.9 13.1-1.3 18.1 1.7" fill="none" stroke="#102217" stroke-linecap="round" stroke-width="2.2"/>
+          <path d="M8.5 15.3c5-1.5 10.6-1 14.8 1.5" fill="none" stroke="#102217" stroke-linecap="round" stroke-width="2"/>
+          <path d="M10 19.4c3.8-1 7.9-.6 11.1 1.3" fill="none" stroke="#102217" stroke-linecap="round" stroke-width="1.8"/>
+        </svg>
+        <div>
+          <span class="player-eyebrow">SPOTIFY</span>
+          <h2>Tu música</h2>
+        </div>
       </div>
       <button type="button" class="close-button" aria-label="Cerrar reproductor" (click)="closePlayer()">
         <span aria-hidden="true">×</span>
@@ -21,17 +34,74 @@
     </header>
 
     <section class="spotify-account" aria-label="Reproducción desde tu cuenta de Spotify">
-      <h3>Tu Spotify</h3>
-      <p class="spotify-status" aria-live="polite">
-        {{ spotify.message() || 'Conecta Spotify para continuar tu playlist activa aquí.' }}
-      </p>
+      @if (spotify.currentTrack(); as track) {
+        <div class="now-playing">
+          @if (track.album.images[0]?.url; as artwork) {
+            <img class="track-artwork" [src]="artwork" alt="" referrerpolicy="no-referrer">
+          } @else {
+            <div class="track-artwork artwork-placeholder" aria-hidden="true">♫</div>
+          }
 
-      @if (spotify.status() === 'playing') {
-        <div class="spotify-account-actions">
-          <button type="button" class="apply-button" (click)="toggleSpotifyPlayback()">Reproducir / pausar</button>
-          <button type="button" class="clear-button" (click)="disconnectSpotify()">Desconectar</button>
+          <div class="track-copy">
+            <span class="now-playing-label">
+              @if (!spotify.isPaused()) {
+                <span class="equalizer" aria-label="Reproduciendo"><i></i><i></i><i></i></span>
+              } @else {
+                EN PAUSA
+              }
+            </span>
+            <strong [title]="track.name">{{ track.name }}</strong>
+            <span [title]="currentArtist()">{{ currentArtist() }}</span>
+          </div>
         </div>
+
+        <div
+          class="progress-track"
+          role="progressbar"
+          [attr.aria-valuenow]="progressPercent()"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          [attr.aria-label]="'Progreso de ' + track.name">
+          <span class="progress-value" [style.width.%]="progressPercent()"></span>
+        </div>
+        <div class="track-times" aria-hidden="true">
+          <span>{{ currentTime() }}</span>
+          <span>{{ durationTime() }}</span>
+        </div>
+
+        <div class="playback-controls" aria-label="Controles de reproducción">
+          <button type="button" class="track-button" aria-label="Canción anterior" (click)="previousTrack()">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14M19 6 8 12l11 6z"/></svg>
+          </button>
+          <button
+            type="button"
+            class="play-button"
+            [attr.aria-label]="spotify.isPaused() ? 'Reproducir' : 'Pausar'"
+            (click)="toggleSpotifyPlayback()">
+            @if (spotify.isPaused()) {
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 12 7-12 7z"/></svg>
+            } @else {
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5h3v14H8zM15 5h3v14h-3z"/></svg>
+            }
+          </button>
+          <button type="button" class="track-button" aria-label="Siguiente canción" (click)="nextTrack()">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 5v14M5 6l11 6-11 6z"/></svg>
+          </button>
+        </div>
+
+        <p class="spotify-status" aria-live="polite">{{ spotify.message() }}</p>
+        <button type="button" class="disconnect-button" (click)="disconnectSpotify()">Desconectar Spotify</button>
       } @else {
+        <p class="spotify-status" aria-live="polite">
+          {{ spotify.message() || 'Conecta Spotify para continuar tu playlist activa aquí.' }}
+        </p>
+
+        @if (!spotifyConfigured) {
+          <p class="setup-note">
+            Configura el Client ID para habilitar Spotify.
+          </p>
+        }
+
         <button
           type="button"
           class="spotify-connect-button"
@@ -43,79 +113,53 @@
             Conectar con Spotify
           }
         </button>
-      }
 
-      @if (!spotifyConfigured) {
-        <p class="setup-note">
-          Configura el Client ID y la URI de retorno indicados en el README para habilitar Spotify.
+        <p class="privacy-note">
+          Requiere Spotify Premium. El acceso se solicita con autorización segura y el token solo vive en memoria.
         </p>
       }
-
-      <p class="privacy-note">
-        Requiere Spotify Premium para reproducir dentro de esta página. Se solicitará permiso para leer la
-        reproducción activa y controlarla; el token vive solo en memoria y el verificador PKCE se elimina al volver.
-      </p>
     </section>
 
-    <div class="player-divider" aria-hidden="true"></div>
-
     @if (spotify.status() !== 'playing') {
-      @if (embedUrl(); as source) {
-        <iframe
-          class="spotify-embed"
-          [src]="source"
-          title="Playlist pública de Spotify"
-          width="352"
-          height="152"
-          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-          loading="lazy">
-        </iframe>
-
-        @if (spotifyPageUrl(); as spotifyUrl) {
-          <a
-            class="open-spotify-link"
-            [href]="spotifyUrl"
-            target="_blank"
-            rel="noopener noreferrer">
-            Abrir en Spotify para escuchar completa
-            <span aria-hidden="true">↗</span>
-          </a>
+      <details class="manual-playlist">
+        <summary>Usar una playlist pública</summary>
+        @if (embedUrl(); as source) {
+          <iframe
+            class="spotify-embed"
+            [src]="source"
+            title="Playlist pública de Spotify"
+            width="352"
+            height="152"
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="lazy">
+          </iframe>
+          <button type="button" class="clear-button" (click)="clearPlaylist()">
+            Quitar playlist de esta sesión
+          </button>
         }
 
-        <button type="button" class="clear-button" (click)="clearPlaylist()">
-          Quitar playlist de esta sesión
-        </button>
-      } @else {
-        <p class="empty-playlists">
-          Pega el enlace de una playlist pública de Spotify para escucharla durante esta sesión.
-        </p>
-      }
+        <form class="playlist-form" novalidate (submit)="$event.preventDefault(); applyPlaylist(playlistLinkInput.value)">
+          <label for="spotify-playlist-link">Enlace de playlist</label>
+          <div class="playlist-input-row">
+            <input
+              #playlistLinkInput
+              id="spotify-playlist-link"
+              type="url"
+              inputmode="url"
+              autocomplete="off"
+              placeholder="https://open.spotify.com/playlist/..."
+              [value]="playlistInput()"
+              (input)="updatePlaylistInput($event)">
+            <button type="submit" class="apply-button">Usar</button>
+          </div>
+        </form>
+      </details>
     }
-
-    <form class="playlist-form" novalidate (submit)="$event.preventDefault(); applyPlaylist(playlistLinkInput.value)">
-      <label for="spotify-playlist-link">Enlace de playlist</label>
-      <div class="playlist-input-row">
-        <input
-          #playlistLinkInput
-          id="spotify-playlist-link"
-          type="url"
-          inputmode="url"
-          autocomplete="off"
-          placeholder="https://open.spotify.com/playlist/..."
-          [value]="playlistInput()"
-          (input)="updatePlaylistInput($event)">
-        <button type="submit" class="apply-button">Usar</button>
-      </div>
-    </form>
 
     @if (feedback()) {
       <p class="player-feedback" [class.error]="hasError()" aria-live="polite">
         {{ feedback() }}
       </p>
     }
-
-    <p class="privacy-note">
-      La playlist pública manual sigue disponible como alternativa sin conectar una cuenta.
-    </p>
   </section>
 }

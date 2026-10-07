@@ -10,6 +10,22 @@ type PlaybackStatus = 'disconnected' | 'authorizing' | 'connecting' | 'playing' 
 interface SpotifyPlayerEvent {
   device_id?: string;
   message?: string;
+  data?: SpotifyPlaybackState | null;
+}
+
+interface SpotifyPlaybackTrack {
+  name: string;
+  artists: { name: string }[];
+  album: { images: { url: string }[] };
+}
+
+interface SpotifyPlaybackState {
+  paused: boolean;
+  position: number;
+  duration: number;
+  track_window: {
+    current_track: SpotifyPlaybackTrack;
+  };
 }
 
 interface SpotifySdkPlayer {
@@ -17,6 +33,8 @@ interface SpotifySdkPlayer {
   connect(): Promise<boolean>;
   disconnect(): void;
   togglePlay(): Promise<void>;
+  nextTrack(): Promise<void>;
+  previousTrack(): Promise<void>;
 }
 
 interface SpotifySdk {
@@ -80,6 +98,10 @@ export class SpotifyPlaybackService {
   readonly status = signal<PlaybackStatus>('disconnected');
   readonly message = signal('');
   readonly activePlaylistUri = signal('');
+  readonly currentTrack = signal<SpotifyPlaybackTrack | null>(null);
+  readonly isPaused = signal(true);
+  readonly position = signal(0);
+  readonly duration = signal(0);
 
   private accessToken = '';
   private accessTokenExpiresAt = 0;
@@ -156,12 +178,32 @@ export class SpotifyPlaybackService {
     await this.player.togglePlay();
   }
 
+  async nextTrack(): Promise<void> {
+    if (!this.player) {
+      throw new Error('Conecta Spotify antes de cambiar de canción.');
+    }
+
+    await this.player.nextTrack();
+  }
+
+  async previousTrack(): Promise<void> {
+    if (!this.player) {
+      throw new Error('Conecta Spotify antes de cambiar de canción.');
+    }
+
+    await this.player.previousTrack();
+  }
+
   disconnect(): void {
     this.player?.disconnect();
     this.player = null;
     this.accessToken = '';
     this.accessTokenExpiresAt = 0;
     this.activePlaylistUri.set('');
+    this.currentTrack.set(null);
+    this.isPaused.set(true);
+    this.position.set(0);
+    this.duration.set(0);
     this.status.set('disconnected');
     this.message.set('Se cerró la conexión de esta página. Para revocar el permiso, hazlo desde tu cuenta de Spotify.');
     this.clearPkceData();
@@ -238,6 +280,21 @@ export class SpotifyPlaybackService {
     player.addListener('not_ready', () => {
       this.status.set('connecting');
       this.message.set('El reproductor web de Spotify se desconectó.');
+    });
+
+    player.addListener('player_state_changed', event => {
+      const state = event.data;
+
+      if (!state) {
+        return;
+      }
+
+      this.currentTrack.set(state.track_window.current_track);
+      this.isPaused.set(state.paused);
+      this.position.set(state.position);
+      this.duration.set(state.duration);
+      this.status.set('playing');
+      this.message.set(state.paused ? 'En pausa' : 'Reproduciendo en DocuJurado');
     });
 
     player.addListener('account_error', event => {

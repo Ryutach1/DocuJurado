@@ -38,6 +38,18 @@ export class MusicPlayer implements OnInit {
     return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
   });
 
+  readonly currentArtist = computed(
+    () => this.spotify.currentTrack()?.artists.map(artist => artist.name).join(', ') ?? ''
+  );
+
+  readonly progressPercent = computed(() => {
+    const duration = this.spotify.duration();
+    return duration > 0 ? Math.min(100, (this.spotify.position() / duration) * 100) : 0;
+  });
+
+  readonly currentTime = computed(() => this.formatTime(this.spotify.position()));
+  readonly durationTime = computed(() => this.formatTime(this.spotify.duration()));
+
   readonly spotifyPageUrl = computed(() => {
     const url = this.playlistUrl();
     return url?.replace('/embed/playlist/', '/playlist/') ?? null;
@@ -95,8 +107,31 @@ export class MusicPlayer implements OnInit {
     }
   }
 
+  async nextTrack(): Promise<void> {
+    try {
+      await this.spotify.nextTrack();
+    } catch (error) {
+      this.spotify.reportError(this.errorMessage(error));
+    }
+  }
+
+  async previousTrack(): Promise<void> {
+    try {
+      await this.spotify.previousTrack();
+    } catch (error) {
+      this.spotify.reportError(this.errorMessage(error));
+    }
+  }
+
   disconnectSpotify(): void {
     this.spotify.disconnect();
+  }
+
+  private formatTime(milliseconds: number): string {
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = String(totalSeconds % 60).padStart(2, '0');
+    return `${minutes}:${seconds}`;
   }
 
   private errorMessage(error: unknown): string {
