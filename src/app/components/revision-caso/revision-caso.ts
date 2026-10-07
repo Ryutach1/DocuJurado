@@ -12,6 +12,7 @@ import { DocumentGeneratorService } from '../../services/document-generator.serv
 export class RevisionCaso {
   readonly backToEdit = output<void>();
   readonly templateFile = input<File | null>(null);
+  readonly tipoDocumentoNombre = input('documento');
   readonly isGenerating = signal(false);
   readonly generationMessage = signal('');
   readonly generationError = signal(false);
@@ -34,7 +35,10 @@ export class RevisionCaso {
 
     try {
       const document = await this.documentGenerator.generateDocument(template, this.caso);
-      this.documentGenerator.downloadDocument(document);
+      this.documentGenerator.downloadDocument(
+        document,
+        `DocuJurado-${this.tipoDocumentoNombre().toLowerCase().replaceAll(' ', '-')}.docx`,
+      );
       this.generationMessage.set(
         'Documento generado y descargado. Revisa el archivo antes de usarlo.',
       );

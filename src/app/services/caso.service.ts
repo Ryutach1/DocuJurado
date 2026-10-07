@@ -7,15 +7,16 @@ import { Hijo } from '../models/hijo';
 import { Gastos } from '../models/gastos';
 import { Abogado } from '../models/abogado';
 import { ConceptoGasto } from '../models/concepto-gasto';
+import { TipoDocumento } from '../models/tipo-documento';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CasoService {
-
   private caso: Caso = {
-
     numeroExpediente: '',
+
+    tipoDocumento: 'pension',
 
     demandante: {
       nombre: '',
@@ -24,7 +25,7 @@ export class CasoService {
       escolaridad: '',
       telefono: '',
       correo: '',
-      direccion: ''
+      direccion: '',
     },
 
     demandado: {
@@ -39,7 +40,7 @@ export class CasoService {
       direccion: '',
       nombreEmpresa: '',
       domicilioEmpresa: '',
-      ingresosMensuales: 0
+      ingresosMensuales: 0,
     },
 
     hijos: [],
@@ -47,35 +48,83 @@ export class CasoService {
     gastos: {
       habitacion: {
         monto: 0,
-        periodicidad: 'Mensual'
+        periodicidad: 'Mensual',
       },
       higiene: {
         monto: 0,
-        periodicidad: 'Mensual'
+        periodicidad: 'Mensual',
       },
       transporte: {
         monto: 0,
-        periodicidad: 'Mensual'
+        periodicidad: 'Mensual',
       },
       vestido: {
         monto: 0,
-        periodicidad: 'Por temporada'
+        periodicidad: 'Por temporada',
       },
       despensa: {
         monto: 0,
-        periodicidad: 'Semanal'
+        periodicidad: 'Semanal',
       },
       salud: {
         monto: 0,
-        periodicidad: 'Mensual'
-      }
+        periodicidad: 'Mensual',
+      },
     },
 
     abogado: {
       nombre: '',
-      cedulaProfesional: 0
-    }
+      cedulaProfesional: 0,
+    },
 
+    datosMatrimonio: {
+      registro: {
+        numeroActa: '',
+        libro: '',
+        foja: '',
+        oficialia: '',
+        municipio: '',
+        estado: '',
+        fechaRegistro: '',
+      },
+      fechaCelebracion: '',
+      lugarCelebracion: '',
+      regimenPatrimonial: '',
+      domicilioConyugal: '',
+      fechaSeparacion: '',
+    },
+
+    datosPension: {
+      modalidadLaboral: 'con-relacion-laboral',
+      porcentajeSolicitado: '',
+      montoSolicitado: 0,
+      situacionLaboralDemandado: '',
+      observaciones: '',
+    },
+
+    datosDivorcio: {
+      domicilioConyugal: '',
+      fechaSeparacion: '',
+      duracionSeparacion: '',
+      propuestaGuardaCustodia: '',
+      propuestaConvivencia: '',
+      propuestaPension: '',
+      bienesComunes: '',
+      solicitarSeparacionProvisional: false,
+      observaciones: '',
+    },
+
+    datosSeparacion: {
+      domicilioConyugal: '',
+      domicilioPropuestoDemandante: '',
+      domicilioPropuestoDemandado: '',
+      fechaSeparacion: '',
+      propuestaGuardaCustodia: '',
+      propuestaConvivencia: '',
+      propuestaPension: '',
+      medidasSolicitadas: '',
+      observaciones: '',
+    },
   };
 
   //====================================================
@@ -146,15 +195,35 @@ export class CasoService {
     this.caso.numeroExpediente = numero;
   }
 
+  actualizarTipoDocumento(tipoDocumento: TipoDocumento): void {
+    this.caso.tipoDocumento = tipoDocumento;
+  }
+
+  actualizarDatosMatrimonio(datos: Caso['datosMatrimonio']): void {
+    this.caso.datosMatrimonio = datos;
+  }
+
+  actualizarDatosPension(datos: Caso['datosPension']): void {
+    this.caso.datosPension = datos;
+  }
+
+  actualizarDatosDivorcio(datos: Caso['datosDivorcio']): void {
+    this.caso.datosDivorcio = datos;
+  }
+
+  actualizarDatosSeparacion(datos: Caso['datosSeparacion']): void {
+    this.caso.datosSeparacion = datos;
+  }
+
   //====================================================
   // UTILIDADES
   //====================================================
 
   limpiarCaso(): void {
-
     this.caso = {
-
       numeroExpediente: '',
+
+      tipoDocumento: 'pension',
 
       demandante: {
         nombre: '',
@@ -163,7 +232,7 @@ export class CasoService {
         escolaridad: '',
         telefono: '',
         correo: '',
-        direccion: ''
+        direccion: '',
       },
 
       demandado: {
@@ -178,7 +247,7 @@ export class CasoService {
         direccion: '',
         nombreEmpresa: '',
         domicilioEmpresa: '',
-        ingresosMensuales: 0
+        ingresosMensuales: 0,
       },
 
       hijos: [],
@@ -186,38 +255,83 @@ export class CasoService {
       gastos: {
         habitacion: {
           monto: 0,
-          periodicidad: 'Mensual'
+          periodicidad: 'Mensual',
         },
         higiene: {
           monto: 0,
-          periodicidad: 'Mensual'
+          periodicidad: 'Mensual',
         },
         transporte: {
           monto: 0,
-          periodicidad: 'Mensual'
+          periodicidad: 'Mensual',
         },
         vestido: {
           monto: 0,
-          periodicidad: 'Por temporada'
+          periodicidad: 'Por temporada',
         },
         despensa: {
           monto: 0,
-          periodicidad: 'Semanal'
+          periodicidad: 'Semanal',
         },
         salud: {
           monto: 0,
-          periodicidad: 'Mensual'
-        }
-
+          periodicidad: 'Mensual',
+        },
       },
 
       abogado: {
         nombre: '',
-        cedulaProfesional: 0
-      }
+        cedulaProfesional: 0,
+      },
 
+      datosMatrimonio: {
+        registro: {
+          numeroActa: '',
+          libro: '',
+          foja: '',
+          oficialia: '',
+          municipio: '',
+          estado: '',
+          fechaRegistro: '',
+        },
+        fechaCelebracion: '',
+        lugarCelebracion: '',
+        regimenPatrimonial: '',
+        domicilioConyugal: '',
+        fechaSeparacion: '',
+      },
+
+      datosPension: {
+        modalidadLaboral: 'con-relacion-laboral',
+        porcentajeSolicitado: '',
+        montoSolicitado: 0,
+        situacionLaboralDemandado: '',
+        observaciones: '',
+      },
+
+      datosDivorcio: {
+        domicilioConyugal: '',
+        fechaSeparacion: '',
+        duracionSeparacion: '',
+        propuestaGuardaCustodia: '',
+        propuestaConvivencia: '',
+        propuestaPension: '',
+        bienesComunes: '',
+        solicitarSeparacionProvisional: false,
+        observaciones: '',
+      },
+
+      datosSeparacion: {
+        domicilioConyugal: '',
+        domicilioPropuestoDemandante: '',
+        domicilioPropuestoDemandado: '',
+        fechaSeparacion: '',
+        propuestaGuardaCustodia: '',
+        propuestaConvivencia: '',
+        propuestaPension: '',
+        medidasSolicitadas: '',
+        observaciones: '',
+      },
     };
-
   }
-
 }

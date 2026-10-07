@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, input, output, signal } from '@angular/core';
 
 @Component({
   selector: 'app-document-loader',
@@ -9,8 +9,18 @@ import { ChangeDetectionStrategy, Component, output, signal } from '@angular/cor
 })
 export class DocumentLoader {
   readonly templateSelected = output<File | null>();
+  readonly documentLabel = input('Plantilla Word del documento activo');
+  readonly selectedFileName = input<string | null>(null);
   readonly fileFeedback = signal('');
   readonly fileError = signal(false);
+
+  constructor() {
+    effect(() => {
+      const fileName = this.selectedFileName();
+      this.fileFeedback.set(fileName ? `${fileName} está asociada a este documento.` : '');
+      this.fileError.set(false);
+    });
+  }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;

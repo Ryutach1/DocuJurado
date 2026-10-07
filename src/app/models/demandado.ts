@@ -1,27 +1,29 @@
 export interface Demandado {
+  nombre: string;
 
-    nombre: string;
+  edad: number;
 
-    edad: number;
+  ocupacion: string;
 
-    ocupacion: string;
+  escolaridad: string;
 
-    escolaridad: string;
+  fechaNacimiento: Date;
 
-    fechaNacimiento: Date;
+  CURP: string;
 
-    CURP: string;
+  NSS?: string;
 
-    NSS?: string;
+  RFC?: string;
 
-    RFC?: string;
+  direccion: string;
 
-    direccion: string;
+  nombreEmpresa: string;
 
-    nombreEmpresa: string;
+  domicilioEmpresa: string;
 
-    domicilioEmpresa: string;
+  ingresosMensuales?: number;
 
-    ingresosMensuales?: number;
+  nacionalidad?: string;
 
+  estadoCivil?: string;
 }

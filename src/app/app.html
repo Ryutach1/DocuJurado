@@ -13,7 +13,22 @@
     </div>
 
     <div class="sidebar-section">
-      <span class="section-label">PENSIÓN ALIMENTICIA</span>
+      <span class="section-label">DOCUMENTOS DEL EXPEDIENTE</span>
+      <nav class="document-tabs" aria-label="Tipo de documento">
+        @for (documento of tiposDocumento; track documento.id) {
+          <button
+            type="button"
+            class="document-tab"
+            [class.active]="tipoDocumento() === documento.id"
+            [attr.aria-pressed]="tipoDocumento() === documento.id"
+            (click)="seleccionarTipoDocumento(documento.id)"
+          >
+            <span>{{ documento.nombre }}</span>
+            <small>{{ documento.detalle }}</small>
+          </button>
+        }
+      </nav>
+      <span class="section-label progress-label">PASOS DEL DOCUMENTO ACTIVO</span>
       <nav class="navigation" aria-label="Progreso del caso">
         <ol class="step-list">
           <li
@@ -46,7 +61,7 @@
             [attr.aria-current]="pasoActual === 4 ? 'step' : null"
           >
             <span class="step-number">04</span>
-            <span>Gastos y necesidades</span>
+            <span>Datos del documento</span>
           </li>
           <li
             class="nav-item"
@@ -54,14 +69,14 @@
             [attr.aria-current]="pasoActual === 5 ? 'step' : null"
           >
             <span class="step-number">05</span>
-            <span>Revisión del escrito</span>
+            <span>Revisión del documento</span>
           </li>
         </ol>
       </nav>
     </div>
 
     <div class="sidebar-footer">
-      <span class="version-label">Versión 0.1.4 · En desarrollo</span>
+      <span class="version-label">Versión 0.1.5 · En desarrollo</span>
       <span>Los datos de prueba no deben ser reales.</span>
     </div>
   </aside>
@@ -70,7 +85,8 @@
     <header class="topbar">
       <div>
         <span class="breadcrumb"
-          >NUEVO CASO <span aria-hidden="true">/</span> PASO {{ pasoActual }} DE 5</span
+          >{{ tipoDocumentoNombre }} <span aria-hidden="true">/</span> PASO {{ pasoActual }} DE
+          5</span
         >
         <h2>{{ tituloPaso }}</h2>
       </div>
@@ -92,7 +108,18 @@
             <span class="privacy-mark" aria-hidden="true">i</span>
             <p>Prototipo de uso local. Para probar, utiliza datos ficticios o anonimizados.</p>
           </div>
+          @if (tipoDocumento() === 'pension') {
+            <div [formGroup]="formularioDatosPension" class="form-group employment-mode">
+              <label for="modalidadLaboral">Modalidad de pensión</label>
+              <select id="modalidadLaboral" formControlName="modalidadLaboral">
+                <option value="con-relacion-laboral">Con relación laboral</option>
+                <option value="sin-relacion-laboral">Sin relación laboral</option>
+              </select>
+            </div>
+          }
           <app-document-loader
+            [documentLabel]="'Plantilla Word · ' + tipoDocumentoNombre"
+            [selectedFileName]="nombrePlantillaActual()"
             (templateSelected)="onTemplateSelected($event)"
           ></app-document-loader>
         </div>
@@ -199,6 +226,26 @@
                 placeholder="Ingresa la dirección completa"
                 formControlName="direccion"
               />
+            </div>
+            <div class="form-group">
+              <label for="nacionalidadDemandante">Nacionalidad</label>
+              <input type="text" id="nacionalidadDemandante" formControlName="nacionalidad" />
+            </div>
+            <div class="form-group">
+              <label for="estadoCivilDemandante">Estado civil</label>
+              <input type="text" id="estadoCivilDemandante" formControlName="estadoCivil" />
+            </div>
+            <div class="form-group">
+              <label for="fechaNacimientoDemandante">Fecha de nacimiento</label>
+              <input type="date" id="fechaNacimientoDemandante" formControlName="fechaNacimiento" />
+            </div>
+            <div class="form-group">
+              <label for="curpDemandante">CURP</label>
+              <input type="text" id="curpDemandante" formControlName="CURP" />
+            </div>
+            <div class="form-group">
+              <label for="rfcDemandante">RFC</label>
+              <input type="text" id="rfcDemandante" formControlName="RFC" />
             </div>
           </form>
           <div class="form-actions">
@@ -319,32 +366,29 @@
             </div>
 
             <!-- CURP -->
-            <div class="form-group">
-              <label for="nombreEmpresa">
-                Nombre de la Empresa en que trabaja
-                <span>*</span>
-              </label>
-              <input
-                type="text"
-                id="nombreEmpresa"
-                placeholder="Ingresa el nombre de la Empresa"
-                formControlName="nombreEmpresa"
-              />
-            </div>
-
-            <!-- Dirección de la empresa -->
-            <div class="form-group">
-              <label for="domicilioEmpresa">
-                Dirección de la Empresa en que trabaja
-                <span>*</span>
-              </label>
-              <input
-                type="text"
-                id="domicilioEmpresa"
-                placeholder="Ingresa la dirección de la empresa"
-                formControlName="domicilioEmpresa"
-              />
-            </div>
+            @if (
+              tipoDocumento() !== 'pension' ||
+              formularioDatosPension.controls.modalidadLaboral.value === 'con-relacion-laboral'
+            ) {
+              <div class="form-group">
+                <label for="nombreEmpresa">Nombre de la empresa</label>
+                <input
+                  type="text"
+                  id="nombreEmpresa"
+                  placeholder="Ingresa el nombre de la empresa"
+                  formControlName="nombreEmpresa"
+                />
+              </div>
+              <div class="form-group">
+                <label for="domicilioEmpresa">Dirección de la empresa</label>
+                <input
+                  type="text"
+                  id="domicilioEmpresa"
+                  placeholder="Ingresa la dirección de la empresa"
+                  formControlName="domicilioEmpresa"
+                />
+              </div>
+            }
 
             <!-- Ingresos mensuales -->
             <div class="form-group">
@@ -358,6 +402,14 @@
                 placeholder=""
                 formControlName="ingresosMensuales"
               />
+            </div>
+            <div class="form-group">
+              <label for="nacionalidadDemandado">Nacionalidad</label>
+              <input type="text" id="nacionalidadDemandado" formControlName="nacionalidad" />
+            </div>
+            <div class="form-group">
+              <label for="estadoCivilDemandado">Estado civil</label>
+              <input type="text" id="estadoCivilDemandado" formControlName="estadoCivil" />
             </div>
           </form>
           <div class="form-actions">
@@ -441,6 +493,62 @@
                     formControlName="escolaridad"
                   />
                 </div>
+
+                <div class="form-group">
+                  <label [for]="'fechaNacimientoHijo-' + i">Fecha de nacimiento</label>
+                  <input
+                    type="date"
+                    [id]="'fechaNacimientoHijo-' + i"
+                    formControlName="fechaNacimiento"
+                  />
+                </div>
+
+                <div class="form-group form-group-large">
+                  <label [for]="'lugarNacimientoHijo-' + i">Lugar de nacimiento</label>
+                  <input
+                    type="text"
+                    [id]="'lugarNacimientoHijo-' + i"
+                    formControlName="lugarNacimiento"
+                  />
+                </div>
+
+                <details class="child-record-details">
+                  <summary>Datos del acta de nacimiento (opcional)</summary>
+                  <div formGroupName="registroCivil" class="nested-form-grid">
+                    <div class="form-group">
+                      <label [for]="'actaHijo-' + i">Número de acta</label>
+                      <input type="text" [id]="'actaHijo-' + i" formControlName="numeroActa" />
+                    </div>
+                    <div class="form-group">
+                      <label [for]="'libroHijo-' + i">Libro</label>
+                      <input type="text" [id]="'libroHijo-' + i" formControlName="libro" />
+                    </div>
+                    <div class="form-group">
+                      <label [for]="'fojaHijo-' + i">Foja</label>
+                      <input type="text" [id]="'fojaHijo-' + i" formControlName="foja" />
+                    </div>
+                    <div class="form-group">
+                      <label [for]="'oficialiaHijo-' + i">Oficialía</label>
+                      <input type="text" [id]="'oficialiaHijo-' + i" formControlName="oficialia" />
+                    </div>
+                    <div class="form-group">
+                      <label [for]="'municipioHijo-' + i">Municipio de registro</label>
+                      <input type="text" [id]="'municipioHijo-' + i" formControlName="municipio" />
+                    </div>
+                    <div class="form-group">
+                      <label [for]="'estadoHijo-' + i">Estado de registro</label>
+                      <input type="text" [id]="'estadoHijo-' + i" formControlName="estado" />
+                    </div>
+                    <div class="form-group">
+                      <label [for]="'fechaRegistroHijo-' + i">Fecha de registro</label>
+                      <input
+                        type="date"
+                        [id]="'fechaRegistroHijo-' + i"
+                        formControlName="fechaRegistro"
+                      />
+                    </div>
+                  </div>
+                </details>
               </div>
             </div>
           }
@@ -467,66 +575,315 @@
           <div class="form-card-header">
             <div>
               <span class="eyebrow">
-                SECCIÓN 04 <span aria-hidden="true">·</span> MANUTENCIÓN
+                SECCIÓN 04 <span aria-hidden="true">·</span> DATOS DEL DOCUMENTO
               </span>
-              <h3>Gastos y necesidades</h3>
-              <p>Indica los montos aproximados y su periodicidad para dar contexto al caso.</p>
+              <h3>{{ tipoDocumentoNombre }}</h3>
+              <p>
+                Completa los datos específicos del documento. Los datos familiares se comparten
+                entre las pestañas.
+              </p>
             </div>
-            <span class="required-info"> Complete los montos aproximados. </span>
+            <span class="required-info">La separación provisional es opcional.</span>
           </div>
-          <form [formGroup]="formularioGastos">
-            <div class="expense-table-wrapper">
-              <table class="expense-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Concepto</th>
-                    <th scope="col">Descripción</th>
-                    <th scope="col">Periodicidad</th>
-                    <th scope="col">Monto (MXN)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (concepto of conceptosGasto; track concepto.clave) {
+          @if (tipoDocumento() === 'pension') {
+            <form [formGroup]="formularioDatosPension" class="form-grid document-fields">
+              <div class="form-group">
+                <label for="porcentajeSolicitado">Porcentaje de pensión solicitado</label>
+                <input
+                  id="porcentajeSolicitado"
+                  type="text"
+                  formControlName="porcentajeSolicitado"
+                />
+              </div>
+              <div class="form-group">
+                <label for="montoSolicitado">Monto solicitado (MXN)</label>
+                <input
+                  id="montoSolicitado"
+                  type="number"
+                  min="0"
+                  formControlName="montoSolicitado"
+                />
+              </div>
+              <div class="form-group form-group-large">
+                <label for="situacionLaboralDemandado">Descripción de la situación laboral</label>
+                <textarea
+                  id="situacionLaboralDemandado"
+                  rows="3"
+                  formControlName="situacionLaboralDemandado"
+                ></textarea>
+              </div>
+              <div class="form-group form-group-large">
+                <label for="observacionesPension">Observaciones</label>
+                <textarea
+                  id="observacionesPension"
+                  rows="3"
+                  formControlName="observaciones"
+                ></textarea>
+              </div>
+            </form>
+          }
+
+          @if (tipoDocumento() === 'divorcio') {
+            <form [formGroup]="formularioDatosDivorcio" class="form-grid document-fields">
+              <div class="form-group form-group-large">
+                <label for="domicilioConyugal">Domicilio conyugal</label>
+                <input id="domicilioConyugal" type="text" formControlName="domicilioConyugal" />
+              </div>
+              <div class="form-group">
+                <label for="fechaSeparacionDivorcio">Fecha de separación</label>
+                <input id="fechaSeparacionDivorcio" type="date" formControlName="fechaSeparacion" />
+              </div>
+              <div class="form-group">
+                <label for="duracionSeparacion">Tiempo de separación</label>
+                <input
+                  id="duracionSeparacion"
+                  type="text"
+                  placeholder="Ej. 3 años"
+                  formControlName="duracionSeparacion"
+                />
+              </div>
+              <div class="form-group">
+                <label class="checkbox-label" for="solicitarSeparacionProvisional">
+                  <input
+                    id="solicitarSeparacionProvisional"
+                    type="checkbox"
+                    formControlName="solicitarSeparacionProvisional"
+                  />
+                  ¿Preparar también la separación provisional?
+                </label>
+              </div>
+              <div class="form-group form-group-large">
+                <label for="propuestaGuardaCustodia">Propuesta de guarda y custodia</label>
+                <textarea
+                  id="propuestaGuardaCustodia"
+                  rows="3"
+                  formControlName="propuestaGuardaCustodia"
+                ></textarea>
+              </div>
+              <div class="form-group form-group-large">
+                <label for="propuestaConvivencia">Propuesta de convivencia</label>
+                <textarea
+                  id="propuestaConvivencia"
+                  rows="3"
+                  formControlName="propuestaConvivencia"
+                ></textarea>
+              </div>
+              <div class="form-group form-group-large">
+                <label for="propuestaPensionDivorcio">Propuesta de pensión alimenticia</label>
+                <textarea
+                  id="propuestaPensionDivorcio"
+                  rows="3"
+                  formControlName="propuestaPension"
+                ></textarea>
+              </div>
+              <div class="form-group form-group-large">
+                <label for="bienesComunes">Bienes comunes o régimen patrimonial</label>
+                <textarea id="bienesComunes" rows="3" formControlName="bienesComunes"></textarea>
+              </div>
+              <div class="form-group form-group-large">
+                <label for="observacionesDivorcio">Observaciones</label>
+                <textarea
+                  id="observacionesDivorcio"
+                  rows="3"
+                  formControlName="observaciones"
+                ></textarea>
+              </div>
+            </form>
+            <form [formGroup]="formularioDatosMatrimonio" class="form-grid document-fields">
+              <h4 class="form-section-title">Datos del matrimonio y acta</h4>
+              <div class="form-group">
+                <label for="fechaCelebracion">Fecha de celebración</label>
+                <input id="fechaCelebracion" type="date" formControlName="fechaCelebracion" />
+              </div>
+              <div class="form-group">
+                <label for="lugarCelebracion">Lugar de celebración</label>
+                <input id="lugarCelebracion" type="text" formControlName="lugarCelebracion" />
+              </div>
+              <div class="form-group">
+                <label for="regimenPatrimonial">Régimen patrimonial</label>
+                <input id="regimenPatrimonial" type="text" formControlName="regimenPatrimonial" />
+              </div>
+              <div class="form-group form-group-large">
+                <label for="domicilioConyugalMatrimonio">Domicilio conyugal (dato común)</label>
+                <input
+                  id="domicilioConyugalMatrimonio"
+                  type="text"
+                  formControlName="domicilioConyugal"
+                />
+              </div>
+              <div formGroupName="registro" class="nested-form-grid">
+                <div class="form-group">
+                  <label for="actaMatrimonio">Número de acta</label>
+                  <input id="actaMatrimonio" type="text" formControlName="numeroActa" />
+                </div>
+                <div class="form-group">
+                  <label for="libroMatrimonio">Libro</label>
+                  <input id="libroMatrimonio" type="text" formControlName="libro" />
+                </div>
+                <div class="form-group">
+                  <label for="fojaMatrimonio">Foja</label>
+                  <input id="fojaMatrimonio" type="text" formControlName="foja" />
+                </div>
+                <div class="form-group">
+                  <label for="oficialiaMatrimonio">Oficialía</label>
+                  <input id="oficialiaMatrimonio" type="text" formControlName="oficialia" />
+                </div>
+                <div class="form-group">
+                  <label for="municipioMatrimonio">Municipio de registro</label>
+                  <input id="municipioMatrimonio" type="text" formControlName="municipio" />
+                </div>
+                <div class="form-group">
+                  <label for="estadoMatrimonio">Estado de registro</label>
+                  <input id="estadoMatrimonio" type="text" formControlName="estado" />
+                </div>
+                <div class="form-group">
+                  <label for="fechaRegistroMatrimonio">Fecha de registro</label>
+                  <input id="fechaRegistroMatrimonio" type="date" formControlName="fechaRegistro" />
+                </div>
+              </div>
+            </form>
+          }
+
+          @if (tipoDocumento() === 'separacion') {
+            <form [formGroup]="formularioDatosSeparacion" class="form-grid document-fields">
+              <div class="form-group form-group-large">
+                <label for="domicilioConyugalSeparacion">Domicilio conyugal</label>
+                <input
+                  id="domicilioConyugalSeparacion"
+                  type="text"
+                  formControlName="domicilioConyugal"
+                />
+              </div>
+              <div class="form-group form-group-large">
+                <label for="domicilioPropuestoDemandante"
+                  >Domicilio propuesto para la parte promovente</label
+                >
+                <input
+                  id="domicilioPropuestoDemandante"
+                  type="text"
+                  formControlName="domicilioPropuestoDemandante"
+                />
+              </div>
+              <div class="form-group form-group-large">
+                <label for="domicilioPropuestoDemandado"
+                  >Domicilio propuesto para la parte demandada</label
+                >
+                <input
+                  id="domicilioPropuestoDemandado"
+                  type="text"
+                  formControlName="domicilioPropuestoDemandado"
+                />
+              </div>
+              <div class="form-group">
+                <label for="fechaSeparacionProvisional">Fecha de separación</label>
+                <input
+                  id="fechaSeparacionProvisional"
+                  type="date"
+                  formControlName="fechaSeparacion"
+                />
+              </div>
+              <div class="form-group form-group-large">
+                <label for="medidasSolicitadas">Medidas provisionales solicitadas</label>
+                <textarea
+                  id="medidasSolicitadas"
+                  rows="3"
+                  formControlName="medidasSolicitadas"
+                ></textarea>
+              </div>
+              <div class="form-group form-group-large">
+                <label for="custodiaSeparacion">Propuesta de guarda y custodia</label>
+                <textarea
+                  id="custodiaSeparacion"
+                  rows="3"
+                  formControlName="propuestaGuardaCustodia"
+                ></textarea>
+              </div>
+              <div class="form-group form-group-large">
+                <label for="convivenciaSeparacion">Propuesta de convivencia</label>
+                <textarea
+                  id="convivenciaSeparacion"
+                  rows="3"
+                  formControlName="propuestaConvivencia"
+                ></textarea>
+              </div>
+              <div class="form-group form-group-large">
+                <label for="pensionSeparacion">Propuesta de pensión alimenticia</label>
+                <textarea
+                  id="pensionSeparacion"
+                  rows="3"
+                  formControlName="propuestaPension"
+                ></textarea>
+              </div>
+              <div class="form-group form-group-large">
+                <label for="observacionesSeparacion">Observaciones</label>
+                <textarea
+                  id="observacionesSeparacion"
+                  rows="3"
+                  formControlName="observaciones"
+                ></textarea>
+              </div>
+            </form>
+          }
+
+          @if (tipoDocumento() === 'pension') {
+            <h4 class="form-section-title">Gastos y necesidades de manutención</h4>
+            <p class="section-description">
+              Indica los montos aproximados y su periodicidad para dar contexto al caso.
+            </p>
+            <form [formGroup]="formularioGastos">
+              <div class="expense-table-wrapper">
+                <table class="expense-table">
+                  <thead>
                     <tr>
-                      <th scope="row">
-                        <strong>{{ concepto.nombre }}</strong>
-                      </th>
-                      <td>
-                        {{ concepto.descripcion }}
+                      <th scope="col">Concepto</th>
+                      <th scope="col">Descripción</th>
+                      <th scope="col">Periodicidad</th>
+                      <th scope="col">Monto (MXN)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (concepto of conceptosGasto; track concepto.clave) {
+                      <tr>
+                        <th scope="row">
+                          <strong>{{ concepto.nombre }}</strong>
+                        </th>
+                        <td>
+                          {{ concepto.descripcion }}
+                        </td>
+                        <td>
+                          {{ concepto.periodo }}
+                        </td>
+                        <td [formGroupName]="concepto.clave">
+                          <label class="visually-hidden" [for]="'gasto-' + concepto.clave"
+                            >Monto para {{ concepto.nombre }}</label
+                          >
+                          <span aria-hidden="true">$</span>
+                          <input
+                            [id]="'gasto-' + concepto.clave"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            formControlName="monto"
+                          />
+                          <span class="currency-suffix">MXN</span>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="3">
+                        <strong>Total Estimado de gastos mensuales</strong>
                       </td>
                       <td>
-                        {{ concepto.periodo }}
-                      </td>
-                      <td [formGroupName]="concepto.clave">
-                        <label class="visually-hidden" [for]="'gasto-' + concepto.clave"
-                          >Monto para {{ concepto.nombre }}</label
-                        >
-                        <span aria-hidden="true">$</span>
-                        <input
-                          [id]="'gasto-' + concepto.clave"
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          formControlName="monto"
-                        />
-                        <span class="currency-suffix">MXN</span>
+                        <strong>${{ totalGastos }} MXN</strong>
                       </td>
                     </tr>
-                  }
-                </tbody>
-                <tfoot>
-                  <tr>
-                    <td colspan="3">
-                      <strong>Total Estimado de gastos mensuales</strong>
-                    </td>
-                    <td>
-                      <strong>${{ totalGastos }} MXN</strong>
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          </form>
+                  </tfoot>
+                </table>
+              </div>
+            </form>
+          }
           <div class="form-actions">
             <button type="button" class="secondary-button" (click)="volver()">
               <span aria-hidden="true">←</span> Anterior
@@ -541,6 +898,7 @@
       @if (pasoActual === 5) {
         <app-revision-caso
           [templateFile]="templateFile()"
+          [tipoDocumentoNombre]="tipoDocumentoNombre"
           (backToEdit)="volverDesdeRevision()"
         ></app-revision-caso>
       }

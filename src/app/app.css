@@ -85,6 +85,43 @@
   letter-spacing: 0.13em;
 }
 
+.document-tabs {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.document-tab {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: #d5ded8;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.document-tab span {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.document-tab small {
+  color: #aebdb4;
+  font-size: 10px;
+}
+
+.document-tab:hover,
+.document-tab.active {
+  border-color: rgb(224 196 157 / 25%);
+  background: rgb(255 255 255 / 9%);
+  color: #fffdf8;
+}
+
 .navigation {
   display: block;
 }
@@ -391,6 +428,8 @@
 }
 
 .form-group input,
+.form-group select,
+.form-group textarea,
 .expense-table input {
   width: 100%;
   min-height: 43px;
@@ -409,11 +448,15 @@
 }
 
 .form-group input:hover,
+.form-group select:hover,
+.form-group textarea:hover,
 .expense-table input:hover {
   border-color: #b7c3b7;
 }
 
 .form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus,
 .expense-table input:focus {
   border-color: #42756b;
   background: #ffffff;
@@ -422,6 +465,48 @@
 
 .form-group input::placeholder {
   color: #9da69f;
+}
+
+.form-group textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.form-section-title {
+  grid-column: 1 / -1;
+  margin: 22px 29px 0;
+  color: #294844;
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.section-description {
+  margin: 5px 29px 0;
+  color: #788078;
+  font-size: 11px;
+}
+
+.nested-form-grid {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 19px 22px;
+  padding-top: 8px;
+}
+
+.checkbox-label {
+  display: inline-flex;
+  min-height: 43px;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+}
+
+.checkbox-label input {
+  width: 17px;
+  min-height: 17px;
+  accent-color: #42756b;
 }
 
 .child-card {
@@ -450,6 +535,10 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 17px;
+}
+
+.child-record-details {
+  grid-column: 1 / -1;
 }
 
 .child-actions {
@@ -624,7 +713,8 @@
 .primary-button:focus-visible,
 .secondary-button:focus-visible,
 .danger-button:focus-visible,
-.nav-item:focus-visible {
+.nav-item:focus-visible,
+.document-tab:focus-visible {
   outline: 3px solid #b97c53;
   outline-offset: 3px;
 }
@@ -682,12 +772,38 @@
     margin-bottom: 9px;
   }
 
+  .document-tabs {
+    display: flex;
+    overflow-x: auto;
+    gap: 7px;
+    margin: 0 0 14px;
+    padding: 0 2px 6px;
+    scrollbar-width: thin;
+  }
+
+  .document-tab {
+    min-width: max-content;
+    padding: 8px 11px;
+  }
+
+  .document-tab small {
+    display: none;
+  }
+
+  .progress-label {
+    margin-top: 0;
+  }
+
   .step-list {
     display: flex;
     gap: 7px;
     overflow-x: auto;
     padding: 0 2px 8px;
     scrollbar-width: thin;
+  }
+
+  .nested-form-grid {
+    grid-template-columns: 1fr;
   }
 
   .step-list::before {

@@ -5,6 +5,7 @@ import { DocumentGeneratorService } from './document-generator.service';
 
 const caso: Caso = {
   numeroExpediente: 'EXP-123',
+  tipoDocumento: 'pension',
   demandante: {
     nombre: 'Ana Ejemplo',
     edad: 34,
@@ -37,6 +38,51 @@ const caso: Caso = {
     salud: { monto: 500, periodicidad: 'Mensual' },
   },
   abogado: { nombre: 'Lic. Ejemplo', cedulaProfesional: 12345 },
+  datosMatrimonio: {
+    registro: {
+      numeroActa: '1',
+      libro: '2',
+      foja: '3',
+      oficialia: '4',
+      municipio: 'Ciudad de prueba',
+      estado: 'Estado de prueba',
+      fechaRegistro: '2010-04-12',
+    },
+    fechaCelebracion: '2010-04-12',
+    lugarCelebracion: 'Ciudad de prueba',
+    regimenPatrimonial: 'Separación de bienes',
+    domicilioConyugal: 'Domicilio de prueba',
+    fechaSeparacion: '2020-08-10',
+  },
+  datosPension: {
+    modalidadLaboral: 'con-relacion-laboral',
+    porcentajeSolicitado: '25%',
+    montoSolicitado: 5000,
+    situacionLaboralDemandado: 'Empleado de prueba',
+    observaciones: '',
+  },
+  datosDivorcio: {
+    domicilioConyugal: 'Domicilio de prueba',
+    fechaSeparacion: '2020-08-10',
+    duracionSeparacion: '3 años',
+    propuestaGuardaCustodia: 'Propuesta de prueba',
+    propuestaConvivencia: 'Propuesta de prueba',
+    propuestaPension: 'Propuesta de prueba',
+    bienesComunes: 'Sin bienes de prueba',
+    solicitarSeparacionProvisional: false,
+    observaciones: '',
+  },
+  datosSeparacion: {
+    domicilioConyugal: 'Domicilio de prueba',
+    domicilioPropuestoDemandante: 'Domicilio de prueba',
+    domicilioPropuestoDemandado: 'Domicilio de prueba',
+    fechaSeparacion: '2020-08-10',
+    propuestaGuardaCustodia: 'Propuesta de prueba',
+    propuestaConvivencia: 'Propuesta de prueba',
+    propuestaPension: 'Propuesta de prueba',
+    medidasSolicitadas: 'Medidas de prueba',
+    observaciones: '',
+  },
 };
 
 function createTemplateFile(xml: string): File {
@@ -74,7 +120,7 @@ describe('DocumentGeneratorService', () => {
 
   it('renders missing optional and out-of-range child data as blank', async () => {
     const template = createTemplateFile(
-      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{demandante.correo}}|{{hijos.4.nombre}}</w:t></w:r></w:p><w:sectPr/></w:body></w:document>',
+      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{demandante.correo}}|{{hijos.4.nombre}}|{{hijos.4.registroCivil.numeroActa}}</w:t></w:r></w:p><w:sectPr/></w:body></w:document>',
     );
 
     const result = await service.generateDocument(template, caso);
@@ -82,6 +128,29 @@ describe('DocumentGeneratorService', () => {
 
     expect(generatedXml).toContain('|');
     expect(generatedXml).not.toContain('{{');
+  });
+
+  it('renders marriage, divorce, separation and pension-specific values', async () => {
+    const template = createTemplateFile(
+      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{datosMatrimonio.registro.numeroActa}}|{{datosMatrimonio.fechaCelebracion}}|{{datosPension.modalidadLaboral}}|{{datosDivorcio.propuestaGuardaCustodia}}|{{datosSeparacion.medidasSolicitadas}}</w:t></w:r></w:p><w:sectPr/></w:body></w:document>',
+    );
+
+    const result = await service.generateDocument(template, caso);
+    const generatedXml = new PizZip(await result.arrayBuffer()).file('word/document.xml')?.asText();
+
+    expect(generatedXml).toContain('|con-relacion-laboral|Propuesta de prueba|Medidas de prueba');
+    expect(generatedXml).toContain('1|');
+    expect(generatedXml).not.toContain('{{');
+  });
+
+  it('joins a variable number of child names with Spanish punctuation', async () => {
+    const template = createTemplateFile(
+      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{hijos.nombres}}|{{hijos.cantidad}}</w:t></w:r></w:p><w:sectPr/></w:body></w:document>',
+    );
+    const result = await service.generateDocument(template, caso);
+    const generatedXml = new PizZip(await result.arrayBuffer()).file('word/document.xml')?.asText();
+
+    expect(generatedXml).toContain('Alex Ejemplo y Sam Ejemplo|2');
   });
 
   it('reports misspelled variables instead of silently generating blanks', async () => {

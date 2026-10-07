@@ -32,7 +32,11 @@ function getTemplateErrorMessage(error: unknown): string {
   return error.message || 'No se pudo generar el documento. Verifica la plantilla seleccionada.';
 }
 
-function formatTemplateDate(value: Date | string): string {
+function formatTemplateDate(value: Date | string | null | undefined): string {
+  if (!value) {
+    return '';
+  }
+
   const date =
     typeof value === 'string'
       ? new Date(`${value}T12:00:00`)
@@ -50,6 +54,7 @@ function formatTemplateDate(value: Date | string): string {
 function buildTemplateData(caso: Caso) {
   const data: Record<string, unknown> = {
     numeroExpediente: caso.numeroExpediente,
+    tipoDocumento: caso.tipoDocumento,
     'demandante.nombre': caso.demandante.nombre,
     'demandante.edad': caso.demandante.edad,
     'demandante.ocupacion': caso.demandante.ocupacion,
@@ -57,6 +62,11 @@ function buildTemplateData(caso: Caso) {
     'demandante.telefono': caso.demandante.telefono,
     'demandante.correo': caso.demandante.correo ?? '',
     'demandante.direccion': caso.demandante.direccion,
+    'demandante.nacionalidad': caso.demandante.nacionalidad ?? '',
+    'demandante.estadoCivil': caso.demandante.estadoCivil ?? '',
+    'demandante.fechaNacimiento': formatTemplateDate(caso.demandante.fechaNacimiento),
+    'demandante.CURP': caso.demandante.CURP ?? '',
+    'demandante.RFC': caso.demandante.RFC ?? '',
     'demandado.nombre': caso.demandado.nombre,
     'demandado.edad': caso.demandado.edad,
     'demandado.ocupacion': caso.demandado.ocupacion,
@@ -69,15 +79,55 @@ function buildTemplateData(caso: Caso) {
     'demandado.nombreEmpresa': caso.demandado.nombreEmpresa,
     'demandado.domicilioEmpresa': caso.demandado.domicilioEmpresa,
     'demandado.ingresosMensuales': caso.demandado.ingresosMensuales ?? 0,
+    'demandado.nacionalidad': caso.demandado.nacionalidad ?? '',
+    'demandado.estadoCivil': caso.demandado.estadoCivil ?? '',
     hijos: caso.hijos.map((hijo) => ({ ...hijo })),
     'abogado.nombre': caso.abogado.nombre,
     'abogado.cedulaProfesional': caso.abogado.cedulaProfesional,
   };
 
+  const nombresHijos = caso.hijos
+    .map((hijo) => hijo.nombre.trim())
+    .filter((nombre) => nombre.length > 0);
+  data['hijos.nombres'] =
+    nombresHijos.length < 2
+      ? (nombresHijos[0] ?? '')
+      : `${nombresHijos.slice(0, -1).join(', ')} y ${nombresHijos[nombresHijos.length - 1]}`;
+  data['hijos.cantidad'] = nombresHijos.length;
+
   for (const [index, hijo] of caso.hijos.entries()) {
     data[`hijos.${index}.nombre`] = hijo.nombre;
     data[`hijos.${index}.edad`] = hijo.edad;
     data[`hijos.${index}.escolaridad`] = hijo.escolaridad;
+    data[`hijos.${index}.fechaNacimiento`] = formatTemplateDate(hijo.fechaNacimiento);
+    data[`hijos.${index}.lugarNacimiento`] = hijo.lugarNacimiento ?? '';
+    for (const [campo, valor] of Object.entries(hijo.registroCivil ?? {})) {
+      data[`hijos.${index}.registroCivil.${campo}`] = valor;
+    }
+  }
+
+  const { datosMatrimonio, datosPension, datosDivorcio, datosSeparacion } = caso;
+  data['datosMatrimonio.fechaCelebracion'] = formatTemplateDate(datosMatrimonio.fechaCelebracion);
+  data['datosMatrimonio.lugarCelebracion'] = datosMatrimonio.lugarCelebracion;
+  data['datosMatrimonio.regimenPatrimonial'] = datosMatrimonio.regimenPatrimonial;
+  data['datosMatrimonio.domicilioConyugal'] = datosMatrimonio.domicilioConyugal;
+  data['datosMatrimonio.fechaSeparacion'] = formatTemplateDate(datosMatrimonio.fechaSeparacion);
+  for (const [campo, valor] of Object.entries(datosMatrimonio.registro)) {
+    data[`datosMatrimonio.registro.${campo}`] =
+      campo === 'fechaRegistro' ? formatTemplateDate(String(valor)) : valor;
+  }
+
+  data['datosPension.modalidadLaboral'] = datosPension.modalidadLaboral;
+  data['datosPension.porcentajeSolicitado'] = datosPension.porcentajeSolicitado;
+  data['datosPension.montoSolicitado'] = datosPension.montoSolicitado;
+  data['datosPension.situacionLaboralDemandado'] = datosPension.situacionLaboralDemandado;
+  data['datosPension.observaciones'] = datosPension.observaciones;
+
+  for (const [campo, valor] of Object.entries(datosDivorcio)) {
+    data[`datosDivorcio.${campo}`] = valor;
+  }
+  for (const [campo, valor] of Object.entries(datosSeparacion)) {
+    data[`datosSeparacion.${campo}`] = valor;
   }
 
   for (const [concepto, gasto] of Object.entries(caso.gastos)) {
@@ -112,7 +162,10 @@ export class DocumentGeneratorService {
         delimiters: { start: '{{', end: '}}' },
         linebreaks: true,
         nullGetter: (part) => {
-          const isOutOfRangeChildField = /^hijos\.\d+\.(nombre|edad|escolaridad)$/.test(part.value);
+          const isOutOfRangeChildField =
+            /^hijos\.\d+\.(nombre|edad|escolaridad|fechaNacimiento|lugarNacimiento|registroCivil\.(numeroActa|libro|foja|oficialia|municipio|estado|fechaRegistro))$/.test(
+              part.value,
+            );
 
           if (isOutOfRangeChildField) {
             return '';

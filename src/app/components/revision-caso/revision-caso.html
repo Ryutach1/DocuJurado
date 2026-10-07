@@ -13,259 +13,346 @@
   </header>
 
   <div class="document-wrapper">
-    <article class="legal-document">
-      <header class="document-header">
-        <div class="logo-placeholder">JUÁREZ</div>
+    @if (caso.tipoDocumento === 'pension') {
+      <article class="legal-document">
+        <header class="document-header">
+          <div class="logo-placeholder">JUÁREZ</div>
 
-        <div class="institution">
-          <strong>PRESIDENCIA MUNICIPAL DE JUÁREZ, N.L.</strong>
-          <span>ADMINISTRACIÓN MUNICIPAL</span>
-        </div>
+          <div class="institution">
+            <strong>PRESIDENCIA MUNICIPAL DE JUÁREZ, N.L.</strong>
+            <span>ADMINISTRACIÓN MUNICIPAL</span>
+          </div>
 
-        <div class="logo-placeholder women">MUJERES</div>
-      </header>
+          <div class="logo-placeholder women">MUJERES</div>
+        </header>
 
-      <section class="document-section recipient">
-        <p>
-          AL C. JUEZ DE JUICIO FAMILIAR ORAL DEL QUINTO DISTRITO JUDICIAL EN EL ESTADO DE NUEVO
-          LEÓN.
-        </p>
-        <p>P R E S E N T E.-</p>
-      </section>
+        <section class="document-section recipient">
+          <p>
+            AL C. JUEZ DE JUICIO FAMILIAR ORAL DEL QUINTO DISTRITO JUDICIAL EN EL ESTADO DE NUEVO
+            LEÓN.
+          </p>
+          <p>P R E S E N T E.-</p>
+        </section>
 
-      <section class="document-body">
-        <p>
-          <span class="dynamic-value">{{ caso.demandante.nombre }}</span
-          >, mexicana, <span class="dynamic-value">{{ caso.demandante.edad }}</span> años de edad,
-          <span class="dynamic-value">{{ caso.demandante.ocupacion }}</span
-          >, con domicilio convencional para oír y recibir notificaciones en
-          <span class="dynamic-value">{{ caso.demandante.direccion }}</span
-          >; ante Usted, con el debido respeto, comparezco y expongo:
-        </p>
+        <section class="document-body">
+          <p>
+            <span class="dynamic-value">{{ caso.demandante.nombre }}</span
+            >, mexicana, <span class="dynamic-value">{{ caso.demandante.edad }}</span> años de edad,
+            <span class="dynamic-value">{{ caso.demandante.ocupacion }}</span
+            >, con domicilio convencional para oír y recibir notificaciones en
+            <span class="dynamic-value">{{ caso.demandante.direccion }}</span
+            >; ante Usted, con el debido respeto, comparezco y expongo:
+          </p>
 
-        <p>
-          Por medio del presente escrito, en representación de mis hijos
-          <span class="dynamic-value">
-            @for (hijo of caso.hijos; track $index) {
-              {{ hijo.nombre }}
-              @if (!$last) {
-                ,
-              }
-            }</span
-          >, quienes viven con la suscrita en el domicilio antes señalado, y con fundamento en los
-          artículos 1068, 1069, 1070 y demás relativos del Código de Procedimientos Civiles vigente
-          en el Estado, promuevo <strong class="dynamic-value">JUICIO ORAL DE ALIMENTOS</strong> en
-          contra de <span class="dynamic-value">{{ caso.demandado.nombre }}</span
-          >, quien puede ser emplazado en
-          <span class="dynamic-value">{{ caso.demandado.direccion }}</span
-          >, reclamando las siguientes:
-        </p>
-
-        <h3 class="document-title">P R E S T A C I O N E S</h3>
-        <ol class="claims">
-          <li>
-            El pago de una pensión alimenticia provisional en favor de los hijos, consistente en un
-            porcentaje del salario y de las prestaciones laborales que perciba el demandado por su
-            trabajo en <span class="dynamic-value">{{ caso.demandado.nombreEmpresa }}</span
-            >, ubicado en <span class="dynamic-value">{{ caso.demandado.domicilioEmpresa }}</span
-            >.
-          </li>
-          <li>
-            El pago de una pensión alimenticia definitiva en favor de los hijos, en los términos que
-            determine la autoridad judicial.
-          </li>
-        </ol>
-        <p>
-          Lo anterior, para cubrir los conceptos que comprende el derecho de alimentos conforme al
-          artículo 308 del Código Civil vigente en el Estado.
-        </p>
-
-        <h3 class="document-title">H E C H O S</h3>
-        <ol class="numbered-section">
-          <li>
-            La promovente y el demandado sostuvieron una relación matrimonial y establecieron su
-            domicilio familiar en <span class="dynamic-value">{{ caso.demandante.direccion }}</span
-            >.
-          </li>
-          <li>
-            De dicha relación nacieron
-            @for (hijo of caso.hijos; track $index) {
-              <span>
-                <span class="dynamic-value">{{ hijo.nombre }}</span
-                >, de <span class="dynamic-value">{{ hijo.edad }}</span> años
+          <p>
+            Por medio del presente escrito, en representación de mis hijos
+            <span class="dynamic-value">
+              @for (hijo of caso.hijos; track $index) {
+                {{ hijo.nombre }}
                 @if (!$last) {
-                  ;
+                  ,
                 }
-              </span>
-            }
-            .
-          </li>
-          <li>
-            El demandado no proporciona una pensión alimenticia suficiente para cubrir las
-            necesidades de sus hijos, por lo que se solicita la intervención judicial para fijar una
-            pensión que contribuya a su manutención.
-          </li>
-          <li>
-            El demandado labora como
-            <span class="dynamic-value">{{ caso.demandado.ocupacion }}</span> en
-            <span class="dynamic-value">{{ caso.demandado.nombreEmpresa }}</span
-            >, con domicilio laboral en
-            <span class="dynamic-value">{{ caso.demandado.domicilioEmpresa }}</span
-            >.
-          </li>
-          <li>
-            Las necesidades alimentarias comprenden, entre otros conceptos, los siguientes gastos:
-          </li>
-        </ol>
+              }</span
+            >, quienes viven con la suscrita en el domicilio antes señalado, y con fundamento en los
+            artículos 1068, 1069, 1070 y demás relativos del Código de Procedimientos Civiles
+            vigente en el Estado, promuevo
+            <strong class="dynamic-value">JUICIO ORAL DE ALIMENTOS</strong> en contra de
+            <span class="dynamic-value">{{ caso.demandado.nombre }}</span
+            >, quien puede ser emplazado en
+            <span class="dynamic-value">{{ caso.demandado.direccion }}</span
+            >, reclamando las siguientes:
+          </p>
 
-        <div class="expense-table-wrapper">
-          <table class="expense-table">
-            <caption>
-              Desglose de gastos de manutención
-            </caption>
-            <thead>
-              <tr>
-                <th scope="col">Concepto</th>
-                <th scope="col">Monto</th>
-                <th scope="col">Periodicidad</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th scope="row">Habitación y servicios</th>
-                <td>$ {{ caso.gastos.habitacion.monto }}</td>
-                <td>{{ caso.gastos.habitacion.periodicidad }}</td>
-              </tr>
-              <tr>
-                <th scope="row">Higiene</th>
-                <td>$ {{ caso.gastos.higiene.monto }}</td>
-                <td>{{ caso.gastos.higiene.periodicidad }}</td>
-              </tr>
-              <tr>
-                <th scope="row">Transporte</th>
-                <td>$ {{ caso.gastos.transporte.monto }}</td>
-                <td>{{ caso.gastos.transporte.periodicidad }}</td>
-              </tr>
-              <tr>
-                <th scope="row">Vestido y calzado</th>
-                <td>$ {{ caso.gastos.vestido.monto }}</td>
-                <td>{{ caso.gastos.vestido.periodicidad }}</td>
-              </tr>
-              <tr>
-                <th scope="row">Despensa</th>
-                <td>$ {{ caso.gastos.despensa.monto }}</td>
-                <td>{{ caso.gastos.despensa.periodicidad }}</td>
-              </tr>
-              <tr>
-                <th scope="row">Salud</th>
-                <td>$ {{ caso.gastos.salud.monto }}</td>
-                <td>{{ caso.gastos.salud.periodicidad }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+          <h3 class="document-title">P R E S T A C I O N E S</h3>
+          <ol class="claims">
+            <li>
+              El pago de una pensión alimenticia provisional en favor de los hijos, consistente en
+              un porcentaje del salario y de las prestaciones laborales que perciba el demandado por
+              su trabajo en <span class="dynamic-value">{{ caso.demandado.nombreEmpresa }}</span
+              >, ubicado en <span class="dynamic-value">{{ caso.demandado.domicilioEmpresa }}</span
+              >.
+            </li>
+            <li>
+              El pago de una pensión alimenticia definitiva en favor de los hijos, en los términos
+              que determine la autoridad judicial.
+            </li>
+          </ol>
+          <p>
+            Lo anterior, para cubrir los conceptos que comprende el derecho de alimentos conforme al
+            artículo 308 del Código Civil vigente en el Estado.
+          </p>
 
-        <h3 class="document-title">D E R E C H O</h3>
-        <ol class="numbered-section legal-basis">
-          <li>
-            La competencia se funda en el artículo 111, fracción XIII, y demás relativos del Código
-            de Procedimientos Civiles del Estado de Nuevo León.
-          </li>
-          <li>
-            El fondo del asunto se rige por los artículos 301, 302, 308, 309, 311, 315, fracción I,
-            317, 321 y 322 del Código Civil vigente en el Estado de Nuevo León.
-          </li>
-          <li>
-            El procedimiento se rige por los artículos 1068 al 1075 del Código de Procedimientos
-            Civiles del Estado de Nuevo León.
-          </li>
-        </ol>
+          <h3 class="document-title">H E C H O S</h3>
+          <ol class="numbered-section">
+            <li>
+              La promovente y el demandado sostuvieron una relación matrimonial y establecieron su
+              domicilio familiar en
+              <span class="dynamic-value">{{ caso.demandante.direccion }}</span
+              >.
+            </li>
+            <li>
+              De dicha relación nacieron
+              @for (hijo of caso.hijos; track $index) {
+                <span>
+                  <span class="dynamic-value">{{ hijo.nombre }}</span
+                  >, de <span class="dynamic-value">{{ hijo.edad }}</span> años
+                  @if (!$last) {
+                    ;
+                  }
+                </span>
+              }
+              .
+            </li>
+            <li>
+              El demandado no proporciona una pensión alimenticia suficiente para cubrir las
+              necesidades de sus hijos, por lo que se solicita la intervención judicial para fijar
+              una pensión que contribuya a su manutención.
+            </li>
+            <li>
+              El demandado labora como
+              <span class="dynamic-value">{{ caso.demandado.ocupacion }}</span> en
+              <span class="dynamic-value">{{ caso.demandado.nombreEmpresa }}</span
+              >, con domicilio laboral en
+              <span class="dynamic-value">{{ caso.demandado.domicilioEmpresa }}</span
+              >.
+            </li>
+            <li>
+              Las necesidades alimentarias comprenden, entre otros conceptos, los siguientes gastos:
+            </li>
+          </ol>
 
-        <h3 class="document-title">C A P Í T U L O D E P R U E B A S</h3>
-        <ul class="evidence-list">
-          <li>
-            <strong>Documentales públicas.</strong> Certificaciones de las actas de nacimiento de
-            los hijos, para acreditar su identidad y el vínculo filial.
-          </li>
-          <li>
-            <strong>Documentales privadas.</strong> Recibos de servicios del domicilio familiar y
-            comprobantes de gastos de alimentación, salud, medicamentos y otros conceptos de
-            manutención.
-          </li>
-          <li>
-            <strong>Actuaciones judiciales.</strong> Todo lo actuado en el procedimiento, en cuanto
-            favorezca a los intereses de la parte promovente.
-          </li>
-          <li>
-            <strong>Presunciones legales y humanas.</strong> En lo que beneficie a los intereses de
-            la parte promovente.
-          </li>
-        </ul>
+          <div class="expense-table-wrapper">
+            <table class="expense-table">
+              <caption>
+                Desglose de gastos de manutención
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Concepto</th>
+                  <th scope="col">Monto</th>
+                  <th scope="col">Periodicidad</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Habitación y servicios</th>
+                  <td>$ {{ caso.gastos.habitacion.monto }}</td>
+                  <td>{{ caso.gastos.habitacion.periodicidad }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Higiene</th>
+                  <td>$ {{ caso.gastos.higiene.monto }}</td>
+                  <td>{{ caso.gastos.higiene.periodicidad }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Transporte</th>
+                  <td>$ {{ caso.gastos.transporte.monto }}</td>
+                  <td>{{ caso.gastos.transporte.periodicidad }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Vestido y calzado</th>
+                  <td>$ {{ caso.gastos.vestido.monto }}</td>
+                  <td>{{ caso.gastos.vestido.periodicidad }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Despensa</th>
+                  <td>$ {{ caso.gastos.despensa.monto }}</td>
+                  <td>{{ caso.gastos.despensa.periodicidad }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Salud</th>
+                  <td>$ {{ caso.gastos.salud.monto }}</td>
+                  <td>{{ caso.gastos.salud.periodicidad }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-        <p>
-          Las pruebas se relacionan con los hechos de la demanda y se ofrecen para acreditar el
-          vínculo filial, las necesidades alimentarias y la capacidad económica del demandado.
-        </p>
+          <h3 class="document-title">D E R E C H O</h3>
+          <ol class="numbered-section legal-basis">
+            <li>
+              La competencia se funda en el artículo 111, fracción XIII, y demás relativos del
+              Código de Procedimientos Civiles del Estado de Nuevo León.
+            </li>
+            <li>
+              El fondo del asunto se rige por los artículos 301, 302, 308, 309, 311, 315, fracción
+              I, 317, 321 y 322 del Código Civil vigente en el Estado de Nuevo León.
+            </li>
+            <li>
+              El procedimiento se rige por los artículos 1068 al 1075 del Código de Procedimientos
+              Civiles del Estado de Nuevo León.
+            </li>
+          </ol>
 
-        <p>Por lo expuesto, a Usted C. Juez atentamente solicito:</p>
-        <ol class="numbered-section requests">
-          <li>
-            Tenerme por presentada, en representación de mis hijos, promoviendo juicio oral de
-            alimentos en contra de <span class="dynamic-value">{{ caso.demandado.nombre }}</span
-            >.
-          </li>
-          <li>
-            Fijar una pensión alimenticia provisional y girar el oficio correspondiente al centro de
-            trabajo del demandado,
-            <span class="dynamic-value">{{ caso.demandado.nombreEmpresa }}</span
-            >, para los efectos legales conducentes.
-          </li>
-          <li>
-            Desahogar las etapas procesales conforme a derecho y, en su oportunidad, dictar
-            sentencia favorable, estableciendo una pensión alimenticia definitiva.
-          </li>
-          <li>
-            Tener por autorizadas a las personas que se indiquen en el escrito y por señalado el
-            medio de acceso al expediente, conforme a la legislación aplicable.
-          </li>
-        </ol>
-
-        <div class="signature">
-          <p>A T E N T A M E N T E</p>
-          <p>“JUÁREZ A LA ORDEN”</p>
-          <p>JUÁREZ, NUEVO LEÓN, A LA FECHA DE SU PRESENTACIÓN</p>
-          <strong>{{ caso.demandante.nombre }}</strong>
-        </div>
-
-        <div class="annexes">
-          <h3 class="document-title">A N E X O S</h3>
-          <ul>
-            <li>Acta de matrimonio.</li>
-            <li>Actas de nacimiento de los hijos.</li>
-            <li>Identificación oficial de la promovente.</li>
-            <li>Comprobantes de servicios del domicilio.</li>
-            <li>Comprobantes de gastos de manutención.</li>
+          <h3 class="document-title">C A P Í T U L O D E P R U E B A S</h3>
+          <ul class="evidence-list">
+            <li>
+              <strong>Documentales públicas.</strong> Certificaciones de las actas de nacimiento de
+              los hijos, para acreditar su identidad y el vínculo filial.
+            </li>
+            <li>
+              <strong>Documentales privadas.</strong> Recibos de servicios del domicilio familiar y
+              comprobantes de gastos de alimentación, salud, medicamentos y otros conceptos de
+              manutención.
+            </li>
+            <li>
+              <strong>Actuaciones judiciales.</strong> Todo lo actuado en el procedimiento, en
+              cuanto favorezca a los intereses de la parte promovente.
+            </li>
+            <li>
+              <strong>Presunciones legales y humanas.</strong> En lo que beneficie a los intereses
+              de la parte promovente.
+            </li>
           </ul>
-        </div>
-      </section>
 
-      <aside class="case-summary" aria-label="Información del expediente">
-        <h3>Información del expediente</h3>
-        <div class="case-row">
-          <span>Expediente</span>
-          <strong>{{ caso.numeroExpediente || 'Sin asignar' }}</strong>
-        </div>
-        <div class="case-row">
-          <span>Abogada</span>
-          <strong>{{ caso.abogado.nombre || 'Sin asignar' }}</strong>
-        </div>
-      </aside>
-    </article>
+          <p>
+            Las pruebas se relacionan con los hechos de la demanda y se ofrecen para acreditar el
+            vínculo filial, las necesidades alimentarias y la capacidad económica del demandado.
+          </p>
+
+          <p>Por lo expuesto, a Usted C. Juez atentamente solicito:</p>
+          <ol class="numbered-section requests">
+            <li>
+              Tenerme por presentada, en representación de mis hijos, promoviendo juicio oral de
+              alimentos en contra de <span class="dynamic-value">{{ caso.demandado.nombre }}</span
+              >.
+            </li>
+            <li>
+              Fijar una pensión alimenticia provisional y girar el oficio correspondiente al centro
+              de trabajo del demandado,
+              <span class="dynamic-value">{{ caso.demandado.nombreEmpresa }}</span
+              >, para los efectos legales conducentes.
+            </li>
+            <li>
+              Desahogar las etapas procesales conforme a derecho y, en su oportunidad, dictar
+              sentencia favorable, estableciendo una pensión alimenticia definitiva.
+            </li>
+            <li>
+              Tener por autorizadas a las personas que se indiquen en el escrito y por señalado el
+              medio de acceso al expediente, conforme a la legislación aplicable.
+            </li>
+          </ol>
+
+          <div class="signature">
+            <p>A T E N T A M E N T E</p>
+            <p>“JUÁREZ A LA ORDEN”</p>
+            <p>JUÁREZ, NUEVO LEÓN, A LA FECHA DE SU PRESENTACIÓN</p>
+            <strong>{{ caso.demandante.nombre }}</strong>
+          </div>
+
+          <div class="annexes">
+            <h3 class="document-title">A N E X O S</h3>
+            <ul>
+              <li>Acta de matrimonio.</li>
+              <li>Actas de nacimiento de los hijos.</li>
+              <li>Identificación oficial de la promovente.</li>
+              <li>Comprobantes de servicios del domicilio.</li>
+              <li>Comprobantes de gastos de manutención.</li>
+            </ul>
+          </div>
+        </section>
+
+        <aside class="case-summary" aria-label="Información del expediente">
+          <h3>Información del expediente</h3>
+          <div class="case-row">
+            <span>Expediente</span>
+            <strong>{{ caso.numeroExpediente || 'Sin asignar' }}</strong>
+          </div>
+          <div class="case-row">
+            <span>Abogada</span>
+            <strong>{{ caso.abogado.nombre || 'Sin asignar' }}</strong>
+          </div>
+        </aside>
+      </article>
+    } @else {
+      <article class="legal-document">
+        <header class="document-header">
+          <div class="logo-placeholder">DOCUJURADO</div>
+          <div class="institution">
+            <strong>{{ tipoDocumentoNombre() }}</strong>
+            <span>RESUMEN DE DATOS PARA REVISIÓN</span>
+          </div>
+          <div class="logo-placeholder">BORRADOR</div>
+        </header>
+        <section class="document-body">
+          <p>
+            Esta vista resume los datos del expediente. El contenido final se completará a partir de
+            la plantilla Word seleccionada para este documento.
+          </p>
+          <h3 class="document-title">PARTES DEL EXPEDIENTE</h3>
+          <p>
+            Parte promovente:
+            <span class="dynamic-value">{{ caso.demandante.nombre || 'Sin capturar' }}</span>
+          </p>
+          <p>
+            Parte demandada:
+            <span class="dynamic-value">{{ caso.demandado.nombre || 'Sin capturar' }}</span>
+          </p>
+          <p>
+            Hijas e hijos registrados:
+            <span class="dynamic-value">{{ caso.hijos.length }}</span>
+          </p>
+          <h3 class="document-title">DATOS DEL DOCUMENTO</h3>
+          @if (caso.tipoDocumento === 'divorcio') {
+            <p>
+              Matrimonio: {{ caso.datosMatrimonio.fechaCelebracion || 'Fecha pendiente' }},
+              {{ caso.datosMatrimonio.lugarCelebracion || 'lugar pendiente' }}.
+            </p>
+            <p>
+              Tiempo de separación:
+              {{ caso.datosDivorcio.duracionSeparacion || 'Pendiente de capturar' }}
+            </p>
+            <p>
+              Régimen patrimonial:
+              {{ caso.datosMatrimonio.regimenPatrimonial || 'Pendiente de capturar' }}
+            </p>
+            <p>
+              Propuesta de custodia:
+              {{ caso.datosDivorcio.propuestaGuardaCustodia || 'Pendiente de capturar' }}
+            </p>
+            <p>
+              Separación provisional:
+              {{
+                caso.datosDivorcio.solicitarSeparacionProvisional ? 'Solicitada' : 'No solicitada'
+              }}
+            </p>
+          } @else {
+            <p>
+              Domicilio conyugal:
+              {{ caso.datosSeparacion.domicilioConyugal || 'Pendiente de capturar' }}
+            </p>
+            <p>
+              Medidas provisionales:
+              {{ caso.datosSeparacion.medidasSolicitadas || 'Pendiente de capturar' }}
+            </p>
+            <p>
+              Propuesta de custodia:
+              {{ caso.datosSeparacion.propuestaGuardaCustodia || 'Pendiente de capturar' }}
+            </p>
+            <p>
+              Propuesta de convivencia:
+              {{ caso.datosSeparacion.propuestaConvivencia || 'Pendiente de capturar' }}
+            </p>
+          }
+          <aside class="case-summary" aria-label="Información del expediente">
+            <h3>Información del expediente</h3>
+            <div class="case-row">
+              <span>Expediente</span>
+              <strong>{{ caso.numeroExpediente || 'Sin asignar' }}</strong>
+            </div>
+            <div class="case-row">
+              <span>Abogada</span>
+              <strong>{{ caso.abogado.nombre || 'Sin asignar' }}</strong>
+            </div>
+          </aside>
+        </section>
+      </article>
+    }
   </div>
 
   <footer class="revision-actions">
     <button type="button" class="secondary-button" (click)="backToEdit.emit()">
-      <span aria-hidden="true">←</span> Volver a gastos
+      <span aria-hidden="true">←</span> Volver al formulario
     </button>
 
     <div class="action-right">

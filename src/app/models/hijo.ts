@@ -1,9 +1,15 @@
+import { DatosRegistroCivil } from './datos-registro-civil';
+
 export interface Hijo {
+  nombre: string;
 
-    nombre: string;
+  edad: number;
 
-    edad: number;
+  escolaridad: string;
 
-    escolaridad: string;
+  fechaNacimiento?: string;
 
+  lugarNacimiento?: string;
+
+  registroCivil?: DatosRegistroCivil;
 }

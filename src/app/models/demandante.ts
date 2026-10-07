@@ -1,17 +1,25 @@
 export interface Demandante {
+  nombre: string;
 
-    nombre: string;
+  edad: number;
 
-    edad: number;
+  ocupacion: string;
 
-    ocupacion: string;
+  escolaridad: string;
 
-    escolaridad: string;
+  telefono: string;
 
-    telefono: string;
+  correo?: string;
 
-    correo?: string;
+  direccion: string;
 
-    direccion: string;
+  nacionalidad?: string;
 
+  estadoCivil?: string;
+
+  fechaNacimiento?: string;
+
+  CURP?: string;
+
+  RFC?: string;
 }
