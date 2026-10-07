@@ -7,12 +7,6 @@ import {
 
 type PlaybackStatus = 'disconnected' | 'authorizing' | 'connecting' | 'playing' | 'error';
 
-interface SpotifyPlayerEvent {
-  device_id?: string;
-  message?: string;
-  data?: SpotifyPlaybackState | null;
-}
-
 interface SpotifyPlaybackTrack {
   name: string;
   artists: { name: string }[];
@@ -28,8 +22,49 @@ interface SpotifyPlaybackState {
   };
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isSpotifyPlaybackTrack(value: unknown): value is SpotifyPlaybackTrack {
+  if (
+    !isRecord(value) ||
+    typeof value['name'] !== 'string' ||
+    !Array.isArray(value['artists']) ||
+    !isRecord(value['album'])
+  ) {
+    return false;
+  }
+
+  return value['artists'].every(artist => isRecord(artist) && typeof artist['name'] === 'string') &&
+    Array.isArray(value['album']['images']) &&
+    value['album']['images'].every(image => isRecord(image) && typeof image['url'] === 'string');
+}
+
+export function isSpotifyPlaybackState(value: unknown): value is SpotifyPlaybackState {
+  if (
+    !isRecord(value) ||
+    typeof value['paused'] !== 'boolean' ||
+    typeof value['position'] !== 'number' ||
+    typeof value['duration'] !== 'number' ||
+    !isRecord(value['track_window'])
+  ) {
+    return false;
+  }
+
+  return isSpotifyPlaybackTrack(value['track_window']['current_track']);
+}
+
+function getDeviceId(event: unknown): string | null {
+  return isRecord(event) && typeof event['device_id'] === 'string' ? event['device_id'] : null;
+}
+
+function getEventMessage(event: unknown): string | null {
+  return isRecord(event) && typeof event['message'] === 'string' ? event['message'] : null;
+}
+
 interface SpotifySdkPlayer {
-  addListener(eventName: string, listener: (event: SpotifyPlayerEvent) => void): boolean;
+  addListener(eventName: string, listener: (event: unknown) => void): boolean;
   connect(): Promise<boolean>;
   disconnect(): void;
   togglePlay(): Promise<void>;
@@ -268,12 +303,14 @@ export class SpotifyPlaybackService {
     this.player = player;
 
     player.addListener('ready', event => {
-      if (!event.device_id) {
+      const deviceId = getDeviceId(event);
+
+      if (!deviceId) {
         this.showSdkError('Spotify no devolvió el dispositivo de reproducción.');
         return;
       }
 
-      void this.playContextOnDevice(event.device_id, contextUri)
+      void this.playContextOnDevice(deviceId, contextUri)
         .catch(error => this.showSdkError(this.errorMessage(error)));
     });
 
@@ -283,12 +320,11 @@ export class SpotifyPlaybackService {
     });
 
     player.addListener('player_state_changed', event => {
-      const state = event.data;
-
-      if (!state) {
+      if (!isSpotifyPlaybackState(event)) {
         return;
       }
 
+      const state = event;
       this.currentTrack.set(state.track_window.current_track);
       this.isPaused.set(state.paused);
       this.position.set(state.position);
@@ -298,12 +334,12 @@ export class SpotifyPlaybackService {
     });
 
     player.addListener('account_error', event => {
-      this.showSdkError(event.message || 'El reproductor web requiere una cuenta Spotify Premium.');
+      this.showSdkError(getEventMessage(event) || 'El reproductor web requiere una cuenta Spotify Premium.');
     });
 
     for (const eventName of ['initialization_error', 'authentication_error', 'playback_error']) {
       player.addListener(eventName, event => {
-        this.showSdkError(event.message || 'Spotify no pudo iniciar la reproducción web.');
+        this.showSdkError(getEventMessage(event) || 'Spotify no pudo iniciar la reproducción web.');
       });
     }
 
@@ -318,6 +354,7 @@ export class SpotifyPlaybackService {
     const url = new URL('https://api.spotify.com/v1/me/player/play');
     url.searchParams.set('device_id', deviceId);
 
+    this.message.set('Solicitud enviada a Spotify; esperando el estado del reproductor…');
     const response = await this.spotifyFetch(url.toString(), {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -327,9 +364,6 @@ export class SpotifyPlaybackService {
     if (!response.ok) {
       throw new Error(await this.responseError(response, 'Spotify no permitió iniciar esta playlist en el reproductor web.'));
     }
-
-    this.status.set('playing');
-    this.message.set('Reproduciendo en DocuJurado. Spotify puede pausar otros dispositivos Connect.');
   }
 
   private async exchangeAuthorizationCode(code: string, verifier: string): Promise<SpotifyTokenResponse> {

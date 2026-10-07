@@ -96,27 +96,35 @@
           {{ spotify.message() || 'Conecta Spotify para continuar tu playlist activa aquí.' }}
         </p>
 
-        @if (!spotifyConfigured) {
-          <p class="setup-note">
-            Configura el Client ID para habilitar Spotify.
+        @if (spotify.status() === 'playing') {
+          <div class="connection-pending" role="status">
+            <span class="connection-spinner" aria-hidden="true"></span>
+            <span>Esperando información de la canción…</span>
+          </div>
+          <button type="button" class="disconnect-button" (click)="disconnectSpotify()">Desconectar Spotify</button>
+        } @else {
+          @if (!spotifyConfigured) {
+            <p class="setup-note">
+              Configura el Client ID para habilitar Spotify.
+            </p>
+          }
+
+          <button
+            type="button"
+            class="spotify-connect-button"
+            [disabled]="!spotifyConfigured || spotify.status() === 'authorizing' || spotify.status() === 'connecting'"
+            (click)="connectSpotify()">
+            @if (spotify.status() === 'authorizing' || spotify.status() === 'connecting') {
+              Conectando…
+            } @else {
+              Conectar con Spotify
+            }
+          </button>
+
+          <p class="privacy-note">
+            Requiere Spotify Premium. El acceso se solicita con autorización segura y el token solo vive en memoria.
           </p>
         }
-
-        <button
-          type="button"
-          class="spotify-connect-button"
-          [disabled]="!spotifyConfigured || spotify.status() === 'authorizing' || spotify.status() === 'connecting'"
-          (click)="connectSpotify()">
-          @if (spotify.status() === 'authorizing' || spotify.status() === 'connecting') {
-            Conectando…
-          } @else {
-            Conectar con Spotify
-          }
-        </button>
-
-        <p class="privacy-note">
-          Requiere Spotify Premium. El acceso se solicita con autorización segura y el token solo vive en memoria.
-        </p>
       }
     </section>
 
