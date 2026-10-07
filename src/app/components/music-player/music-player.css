@@ -3,7 +3,7 @@
   z-index: 1000;
   right: 24px;
   bottom: 20px;
-  font-family: Inter, Arial, sans-serif;
+  font-family: var(--font-sans, 'Segoe UI', Arial, sans-serif);
 }
 
 .player-toggle,
@@ -26,7 +26,10 @@
   background: #1db954;
   box-shadow: 0 6px 20px rgb(15 23 42 / 28%);
   color: #1db954;
-  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .player-toggle svg {
@@ -50,7 +53,7 @@
 .apply-button:focus-visible,
 .clear-button:focus-visible,
 .manual-playlist summary:focus-visible {
-  outline: 3px solid #60a5fa;
+  outline: 3px solid #d9aa7e;
   outline-offset: 3px;
 }
 
@@ -61,11 +64,12 @@
   padding: 17px;
   overflow-x: hidden;
   overflow-y: auto;
-  border: 1px solid #374151;
+  border: 1px solid #385452;
   border-radius: 18px;
-  background: #111827;
+  background: #153835;
   box-shadow: 0 18px 46px rgb(15 23 42 / 38%);
   color: #f9fafb;
+  font-family: var(--font-sans, 'Segoe UI', Arial, sans-serif);
   animation: panel-arrive 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   transform-origin: bottom right;
 }
@@ -100,6 +104,7 @@
 
 .player-header h2 {
   margin: 2px 0 0;
+  font-family: var(--font-display, Georgia, serif);
   font-size: 17px;
   font-weight: 700;
 }
@@ -108,16 +113,18 @@
   width: 31px;
   height: 31px;
   border-radius: 50%;
-  background: #1f2937;
+  background: #254744;
   color: #ffffff;
   font-size: 22px;
   line-height: 1;
-  transition: background 0.18s ease, transform 0.18s ease;
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease;
 }
 
 .close-button:hover {
   transform: rotate(90deg);
-  background: #374151;
+  background: #315752;
 }
 
 .spotify-status {
@@ -140,7 +147,7 @@
   width: 13px;
   height: 13px;
   flex: 0 0 13px;
-  border: 2px solid #4b5563;
+  border: 2px solid #58706a;
   border-top-color: #1ed760;
   border-radius: 50%;
   animation: connection-spin 0.8s linear infinite;
@@ -157,7 +164,9 @@
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.18s ease, transform 0.18s ease;
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease;
 }
 
 .spotify-connect-button:hover:not(:disabled) {
@@ -166,9 +175,9 @@
 }
 
 .spotify-connect-button:disabled {
-  border-color: #4b5563;
-  background: #374151;
-  color: #9ca3af;
+  border-color: #58706a;
+  background: #31504b;
+  color: #c4d0c9;
   cursor: wait;
 }
 
@@ -184,7 +193,7 @@
   width: 64px;
   height: 64px;
   border-radius: 9px;
-  background: #1f2937;
+  background: #254744;
   object-fit: cover;
   box-shadow: 0 5px 14px rgb(0 0 0 / 24%);
 }
@@ -296,7 +305,9 @@
   border-radius: 50%;
   background: transparent;
   color: #d1d5db;
-  transition: color 0.18s ease, transform 0.18s ease;
+  transition:
+    color 0.18s ease,
+    transform 0.18s ease;
 }
 
 .track-button:hover {
@@ -331,7 +342,10 @@
   border-radius: 50%;
   background: #ffffff;
   color: #111827;
-  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
 }
 
 .play-button:hover {
@@ -355,19 +369,22 @@
 .disconnect-button {
   width: 100%;
   padding: 7px 10px;
-  border: 1px solid #374151;
+  border: 1px solid #47635d;
   border-radius: 8px;
   background: transparent;
   color: #aeb8c7;
   font: inherit;
   font-size: 10px;
   cursor: pointer;
-  transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+  transition:
+    color 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
 }
 
 .disconnect-button:hover {
-  border-color: #64748b;
-  background: #1f2937;
+  border-color: #718b7d;
+  background: #254744;
   color: #ffffff;
 }
 
@@ -416,15 +433,17 @@
 
 .clear-button,
 .apply-button {
-  border: 1px solid #4b5563;
+  border: 1px solid #58706a;
   border-radius: 8px;
-  background: #1f2937;
+  background: #254744;
   color: #f9fafb;
   font: inherit;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.18s ease, color 0.18s ease;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
 }
 
 .clear-button {
@@ -434,7 +453,7 @@
 }
 
 .clear-button:hover {
-  background: #374151;
+  background: #315752;
 }
 
 .playlist-form label {
@@ -453,9 +472,9 @@
   min-width: 0;
   width: 100%;
   padding: 8px 10px;
-  border: 1px solid #4b5563;
+  border: 1px solid #58706a;
   border-radius: 8px;
-  background: #1f2937;
+  background: #254744;
   color: #f9fafb;
   font: inherit;
   font-size: 11px;

@@ -1,3 +1,46 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
+
+:root {
+  color-scheme: light;
+  --surface-page: #f6f3ec;
+  --surface-card: #fffefa;
+  --color-ink: #243b3a;
+  --color-ink-deep: #173b39;
+  --color-muted: #6f7b73;
+  --color-line: #e7e1d6;
+  --color-copper: #a96f4b;
+  --color-sage: #688d72;
+  --font-sans: 'Segoe UI', Arial, sans-serif;
+  --font-display: Georgia, 'Times New Roman', serif;
+  font-family: var(--font-sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: var(--surface-page);
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: #dce8d9;
+  color: #173b39;
+}

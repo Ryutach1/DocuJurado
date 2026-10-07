@@ -1,13 +1,13 @@
 <div class="revision-container">
   <header class="revision-header">
     <div>
-      <span class="eyebrow">PASO 5 DE 5</span>
-      <h2>Revisión del documento</h2>
-      <p>Revisa el escrito completo antes de generar el documento Word.</p>
+      <span class="eyebrow">PASO 05 <span aria-hidden="true">·</span> VISTA PREVIA</span>
+      <h2>Revisión del escrito</h2>
+      <p>Comprueba la información y el formato del borrador antes de continuar.</p>
     </div>
 
     <div class="revision-status">
-      <span class="status-dot"></span>
+      <span class="status-dot" aria-hidden="true"></span>
       Vista previa
     </div>
   </header>
@@ -26,33 +26,39 @@
       </header>
 
       <section class="document-section recipient">
-        <p>AL C. JUEZ DE JUICIO FAMILIAR ORAL DEL QUINTO DISTRITO JUDICIAL EN EL ESTADO DE NUEVO LEÓN.</p>
+        <p>
+          AL C. JUEZ DE JUICIO FAMILIAR ORAL DEL QUINTO DISTRITO JUDICIAL EN EL ESTADO DE NUEVO
+          LEÓN.
+        </p>
         <p>P R E S E N T E.-</p>
       </section>
 
       <section class="document-body">
         <p>
-          <span class="dynamic-value">{{ caso.demandante.nombre }}</span>, mexicana,
-          <span class="dynamic-value">{{ caso.demandante.edad }}</span> años de edad,
-          <span class="dynamic-value">{{ caso.demandante.ocupacion }}</span>, con domicilio
-          convencional para oír y recibir notificaciones en
-          <span class="dynamic-value">{{ caso.demandante.direccion }}</span>; ante Usted,
-          con el debido respeto, comparezco y expongo:
+          <span class="dynamic-value">{{ caso.demandante.nombre }}</span
+          >, mexicana, <span class="dynamic-value">{{ caso.demandante.edad }}</span> años de edad,
+          <span class="dynamic-value">{{ caso.demandante.ocupacion }}</span
+          >, con domicilio convencional para oír y recibir notificaciones en
+          <span class="dynamic-value">{{ caso.demandante.direccion }}</span
+          >; ante Usted, con el debido respeto, comparezco y expongo:
         </p>
 
         <p>
           Por medio del presente escrito, en representación de mis hijos
           <span class="dynamic-value">
             @for (hijo of caso.hijos; track $index) {
-              {{ hijo.nombre }}@if (!$last) {, }
-            }
-          </span>, quienes viven con la suscrita en el domicilio antes señalado, y con fundamento
-          en los artículos 1068, 1069, 1070 y demás relativos del Código de Procedimientos Civiles
-          vigente en el Estado, promuevo
-          <strong class="dynamic-value">JUICIO ORAL DE ALIMENTOS</strong> en contra de
-          <span class="dynamic-value">{{ caso.demandado.nombre }}</span>, quien puede ser emplazado
-          en <span class="dynamic-value">{{ caso.demandado.direccion }}</span>, reclamando las
-          siguientes:
+              {{ hijo.nombre }}
+              @if (!$last) {
+                ,
+              }
+            }</span
+          >, quienes viven con la suscrita en el domicilio antes señalado, y con fundamento en los
+          artículos 1068, 1069, 1070 y demás relativos del Código de Procedimientos Civiles vigente
+          en el Estado, promuevo <strong class="dynamic-value">JUICIO ORAL DE ALIMENTOS</strong> en
+          contra de <span class="dynamic-value">{{ caso.demandado.nombre }}</span
+          >, quien puede ser emplazado en
+          <span class="dynamic-value">{{ caso.demandado.direccion }}</span
+          >, reclamando las siguientes:
         </p>
 
         <h3 class="document-title">P R E S T A C I O N E S</h3>
@@ -60,12 +66,13 @@
           <li>
             El pago de una pensión alimenticia provisional en favor de los hijos, consistente en un
             porcentaje del salario y de las prestaciones laborales que perciba el demandado por su
-            trabajo en <span class="dynamic-value">{{ caso.demandado.nombreEmpresa }}</span>,
-            ubicado en <span class="dynamic-value">{{ caso.demandado.domicilioEmpresa }}</span>.
+            trabajo en <span class="dynamic-value">{{ caso.demandado.nombreEmpresa }}</span
+            >, ubicado en <span class="dynamic-value">{{ caso.demandado.domicilioEmpresa }}</span
+            >.
           </li>
           <li>
-            El pago de una pensión alimenticia definitiva en favor de los hijos, en los términos
-            que determine la autoridad judicial.
+            El pago de una pensión alimenticia definitiva en favor de los hijos, en los términos que
+            determine la autoridad judicial.
           </li>
         </ol>
         <p>
@@ -77,27 +84,34 @@
         <ol class="numbered-section">
           <li>
             La promovente y el demandado sostuvieron una relación matrimonial y establecieron su
-            domicilio familiar en <span class="dynamic-value">{{ caso.demandante.direccion }}</span>.
+            domicilio familiar en <span class="dynamic-value">{{ caso.demandante.direccion }}</span
+            >.
           </li>
           <li>
             De dicha relación nacieron
             @for (hijo of caso.hijos; track $index) {
               <span>
-                <span class="dynamic-value">{{ hijo.nombre }}</span>, de
-                <span class="dynamic-value">{{ hijo.edad }}</span> años@if (!$last) {; }
+                <span class="dynamic-value">{{ hijo.nombre }}</span
+                >, de <span class="dynamic-value">{{ hijo.edad }}</span> años
+                @if (!$last) {
+                  ;
+                }
               </span>
-            }.
+            }
+            .
           </li>
           <li>
             El demandado no proporciona una pensión alimenticia suficiente para cubrir las
-            necesidades de sus hijos, por lo que se solicita la intervención judicial para fijar
-            una pensión que contribuya a su manutención.
+            necesidades de sus hijos, por lo que se solicita la intervención judicial para fijar una
+            pensión que contribuya a su manutención.
           </li>
           <li>
             El demandado labora como
             <span class="dynamic-value">{{ caso.demandado.ocupacion }}</span> en
-            <span class="dynamic-value">{{ caso.demandado.nombreEmpresa }}</span>, con domicilio
-            laboral en <span class="dynamic-value">{{ caso.demandado.domicilioEmpresa }}</span>.
+            <span class="dynamic-value">{{ caso.demandado.nombreEmpresa }}</span
+            >, con domicilio laboral en
+            <span class="dynamic-value">{{ caso.demandado.domicilioEmpresa }}</span
+            >.
           </li>
           <li>
             Las necesidades alimentarias comprenden, entre otros conceptos, los siguientes gastos:
@@ -106,7 +120,9 @@
 
         <div class="expense-table-wrapper">
           <table class="expense-table">
-            <caption>Desglose de gastos de manutención</caption>
+            <caption>
+              Desglose de gastos de manutención
+            </caption>
             <thead>
               <tr>
                 <th scope="col">Concepto</th>
@@ -181,8 +197,8 @@
             favorezca a los intereses de la parte promovente.
           </li>
           <li>
-            <strong>Presunciones legales y humanas.</strong> En lo que beneficie a los intereses
-            de la parte promovente.
+            <strong>Presunciones legales y humanas.</strong> En lo que beneficie a los intereses de
+            la parte promovente.
           </li>
         </ul>
 
@@ -195,12 +211,14 @@
         <ol class="numbered-section requests">
           <li>
             Tenerme por presentada, en representación de mis hijos, promoviendo juicio oral de
-            alimentos en contra de <span class="dynamic-value">{{ caso.demandado.nombre }}</span>.
+            alimentos en contra de <span class="dynamic-value">{{ caso.demandado.nombre }}</span
+            >.
           </li>
           <li>
             Fijar una pensión alimenticia provisional y girar el oficio correspondiente al centro de
-            trabajo del demandado, <span class="dynamic-value">{{ caso.demandado.nombreEmpresa }}</span>,
-            para los efectos legales conducentes.
+            trabajo del demandado,
+            <span class="dynamic-value">{{ caso.demandado.nombreEmpresa }}</span
+            >, para los efectos legales conducentes.
           </li>
           <li>
             Desahogar las etapas procesales conforme a derecho y, en su oportunidad, dictar
@@ -246,14 +264,44 @@
   </div>
 
   <footer class="revision-actions">
-    <button type="button" class="secondary-button">← Volver a editar</button>
+    <button type="button" class="secondary-button" (click)="backToEdit.emit()">
+      <span aria-hidden="true">←</span> Volver a gastos
+    </button>
 
     <div class="action-right">
-      <span class="revision-help">Verifica los datos antes de generar el documento.</span>
-      <button type="button" class="primary-button">
-        Generar documento Word
-        <span>→</span>
+      <span class="revision-help" id="generation-note">
+        @if (templateFile(); as template) {
+          Plantilla lista: {{ template.name }}
+        } @else {
+          Selecciona una plantilla DOCX en la parte superior para habilitar la descarga.
+        }
+      </span>
+      <button
+        type="button"
+        class="primary-button"
+        [disabled]="!templateFile() || isGenerating()"
+        [attr.aria-describedby]="
+          generationMessage() ? 'generation-note generation-feedback' : 'generation-note'
+        "
+        (click)="generateDocument()"
+      >
+        @if (isGenerating()) {
+          Generando…
+        } @else {
+          Generar y descargar DOCX
+          <span aria-hidden="true">↓</span>
+        }
       </button>
     </div>
+    @if (generationMessage()) {
+      <p
+        id="generation-feedback"
+        class="generation-feedback"
+        [class.error]="generationError()"
+        aria-live="polite"
+      >
+        {{ generationMessage() }}
+      </p>
+    }
   </footer>
 </div>

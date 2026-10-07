@@ -1,454 +1,548 @@
 <div class="app-container">
-
-  <aside class="sidebar">
-
+  <aside class="sidebar" aria-label="Navegación del caso">
     <div class="brand">
-      <div class="brand-icon">⚖</div>
+      <div class="brand-icon" aria-hidden="true">
+        <svg viewBox="0 0 32 32" focusable="false">
+          <path d="M16 4v21M10 28h12M8 8h16M11 8 6 18h10L11 8Zm10 0-5 10h10L21 8Z" />
+        </svg>
+      </div>
       <div>
         <h1>DocuJurado</h1>
-        <span>Redacción jurídica especializada</span>
+        <span>Asistente de documentos</span>
       </div>
     </div>
+
     <div class="sidebar-section">
-      <span class="section-label">NUEVO CASO</span>
-      <nav class="navigation">
-        <a class="nav-item active" href=".../pages/pensionForm.html">
-          <span class="step-number">1</span>
-          <span>Pensión Alimenticia</span>
-        </a>
-        <a class="nav-item" href=".../pages/divorcioForm.html">
-          <span class="step-number">2</span>
-          <span>Divorcio Incausado</span>
-        </a>
-        <a class="nav-item" href=".../pages/custodiaForm.html">
-          <span class="step-number">3</span>
-          <span>Causa por Custodia</span>
-        </a>
-        <a class="nav-item">
-          <span class="step-number">4</span>
-          <span>Revisión de plantillas</span>
-        </a>
-        <a class="nav-item">
-          <span class="step-number">5</span>
-          <span>Causas pendientes</span>
-        </a>
+      <span class="section-label">PENSIÓN ALIMENTICIA</span>
+      <nav class="navigation" aria-label="Progreso del caso">
+        <ol class="step-list">
+          <li
+            class="nav-item"
+            [class.active]="pasoActual === 1"
+            [attr.aria-current]="pasoActual === 1 ? 'step' : null"
+          >
+            <span class="step-number">01</span>
+            <span>Parte promovente</span>
+          </li>
+          <li
+            class="nav-item"
+            [class.active]="pasoActual === 2"
+            [attr.aria-current]="pasoActual === 2 ? 'step' : null"
+          >
+            <span class="step-number">02</span>
+            <span>Parte demandada</span>
+          </li>
+          <li
+            class="nav-item"
+            [class.active]="pasoActual === 3"
+            [attr.aria-current]="pasoActual === 3 ? 'step' : null"
+          >
+            <span class="step-number">03</span>
+            <span>Hijas e hijos</span>
+          </li>
+          <li
+            class="nav-item"
+            [class.active]="pasoActual === 4"
+            [attr.aria-current]="pasoActual === 4 ? 'step' : null"
+          >
+            <span class="step-number">04</span>
+            <span>Gastos y necesidades</span>
+          </li>
+          <li
+            class="nav-item"
+            [class.active]="pasoActual === 5"
+            [attr.aria-current]="pasoActual === 5 ? 'step' : null"
+          >
+            <span class="step-number">05</span>
+            <span>Revisión del escrito</span>
+          </li>
+        </ol>
       </nav>
     </div>
+
     <div class="sidebar-footer">
-      <span>Versión 0.1.2</span>
-      <span>Procesamiento local</span>
+      <span class="version-label">Versión 0.1.4 · En desarrollo</span>
+      <span>Los datos de prueba no deben ser reales.</span>
     </div>
   </aside>
-
 
   <main class="main-content">
     <header class="topbar">
       <div>
-        <span class="breadcrumb">Nuevo caso</span>
-        <h2>Información de la demandante</h2>
+        <span class="breadcrumb"
+          >NUEVO CASO <span aria-hidden="true">/</span> PASO {{ pasoActual }} DE 5</span
+        >
+        <h2>{{ tituloPaso }}</h2>
       </div>
-      <div class="case-status">
-        <span class="status-dot"></span>
-        Caso en edición
-      </div>
+      <span class="case-status"><span class="status-dot"></span> Borrador local</span>
     </header>
 
-
     <section class="content-area">
-      <div class="welcome-card">
-        <div>
-          <h3>Bienvenido a MADJ</h3>
+      <section class="welcome-card" aria-labelledby="welcome-title">
+        <div class="welcome-copy">
+          <span class="eyebrow">PREPARACIÓN GUIADA</span>
+          <h3 id="welcome-title">Un caso a la vez, con claridad.</h3>
           <p>
-            Este asistente te guiará paso a paso para crear tu documento jurídico. <br>
-            Inserta la plantilla que deseas utilizar y completa los datos solicitados para generar tu documento final.
-          </p>
-          <app-document-loader></app-document-loader>
-        </div>
-        <div>
-          <h3>Comencemos con los datos principales</h3>
-          <p>
-            Completa la información de la demandante para comenzar
-            a construir el documento jurídico.
+            Completa la información y revisa el borrador antes de generar una copia DOCX de tu
+            plantilla. El procesamiento ocurre en este navegador.
           </p>
         </div>
-      </div>
-
-      @if (pasoActual === 1){
-      <div class="form-card">
-        <div class="form-card-header">
-          <div>
-            <span class="eyebrow">SECCIÓN 01</span>
-            <h3>Datos del Demandante</h3>
+        <div class="welcome-aside">
+          <div class="privacy-note">
+            <span class="privacy-mark" aria-hidden="true">i</span>
+            <p>Prototipo de uso local. Para probar, utiliza datos ficticios o anonimizados.</p>
           </div>
-          <span class="required-info">
-            * Campos obligatorios
-          </span>
+          <app-document-loader
+            (templateSelected)="onTemplateSelected($event)"
+          ></app-document-loader>
         </div>
-        <form [formGroup]="formularioDemandante" class="form-grid">
+      </section>
 
-          <!-- Nombre -->
-          <div class="form-group form-group-large">
-            <label for="nombre">
-              Nombre completo
-              <span>*</span>
-            </label>
-            <input type="text" id="nombre" placeholder="Ingresa el nombre completo" formControlName="nombre">
+      @if (pasoActual === 1) {
+        <div class="form-card">
+          <div class="form-card-header">
+            <div>
+              <span class="eyebrow"
+                >SECCIÓN 01 <span aria-hidden="true">·</span> PERSONA PROMOVENTE</span
+              >
+              <h3>Datos de quien promueve</h3>
+              <p>Información de contacto y datos generales de la parte actora.</p>
+            </div>
+            <span class="required-info"> <span aria-hidden="true">*</span> Campos señalados </span>
           </div>
-
-          <!-- Edad -->
-          <div class="form-group">
-            <label for="edad">
-              Edad
-              <span>*</span>
-            </label>
-            <input type="number" id="edad" placeholder="Ingresa la edad" formControlName="edad">
-          </div>
-
-          <!-- Ocupación -->
-          <div class="form-group">
-            <label for="ocupacion">
-              Ocupación
-              <span>*</span>
-            </label>
-            <input type="text" id="ocupacion" placeholder="Desempleado, Abogado, Cajero, etc."
-              formControlName="ocupacion">
-          </div>
-
-          <!-- Escolaridad -->
-          <div class="form-group">
-            <label for="escolaridad">
-              Escolaridad
-              <span>*</span>
-            </label>
-            <input type="text" id="escolaridad" placeholder="Primaria, Secundaria, Título"
-              formControlName="escolaridad">
-          </div>
-
-          <!-- Teléfono -->
-          <div class="form-group">
-            <label for="telefono">
-              Teléfono
-              <span>*</span>
-            </label>
-            <input type="tel" id="telefono" placeholder="Ingresa el teléfono de contacto" formControlName="telefono">
-          </div>
-
-          <!-- Correo -->
-          <div class="form-group">
-            <label for="correo">
-              Correo electrónico
-            </label>
-            <input type="email" id="correo" placeholder="Ingresa el correo electrónico" formControlName="correo">
-          </div>
-
-          <!-- Dirección -->
-          <div class="form-group form-group-full">
-            <label for="direccion">
-              Dirección
-              <span>*</span>
-            </label>
-            <input type="text" id="direccion" placeholder="Ingresa la dirección completa" formControlName="direccion">
-          </div>
-        </form>
-        <div class="form-actions">
-          <span class="progress-text">
-            Paso {{pasoActual}} de 5
-          </span>
-          <button type="button" class="primary-button" (click)="volver()">
-            Volver a revisar los datos
-            <span>←</span>
-          </button>
-          <button type="button" class="primary-button" (click)="continuar()">
-            Continuar
-            <span>→</span>
-          </button>
-        </div>
-      </div>
-      }
-      @if (pasoActual === 2) {
-
-      <div class="form-card">
-        <div class="form-card-header">
-          <div>
-            <span class="eyebrow">SECCIÓN 02</span>
-            <h3>Datos del Demandado</h3>
-          </div>
-          <span class="required-info">
-            * Campos obligatorios
-          </span>
-        </div>
-        <form [formGroup]="formularioDemandado" class="form-grid">
-          <!-- Nombre -->
-          <div class="form-group form-group-large">
-            <label for="nombre">
-              Nombre completo
-              <span>*</span>
-            </label>
-            <input type="text" id="nombre" placeholder="Ingresa el nombre completo" formControlName="nombre">
-          </div>
-
-          <!-- Edad -->
-          <div class="form-group">
-            <label for="edad">
-              Edad
-              <span>*</span>
-            </label>
-            <input type="number" id="edad" placeholder="Ingresa la edad" formControlName="edad">
-          </div>
-
-          <!-- Ocupación -->
-          <div class="form-group">
-            <label for="ocupacion">
-              Ocupación
-              <span>*</span>
-            </label>
-            <input type="text" id="ocupacion" placeholder="Desempleado, Abogado, Cajero, etc."
-              formControlName="ocupacion">
-          </div>
-
-          <!-- Escolaridad -->
-          <div class="form-group">
-            <label for="escolaridad">
-              Escolaridad
-              <span>*</span>
-            </label>
-            <input type="text" id="escolaridad" placeholder="Primaria, Secundaria, Título"
-              formControlName="escolaridad">
-          </div>
-
-          <!-- fecha de nacimiento -->
-          <div class="form-group">
-            <label for="fechaNacimiento">
-              Fecha de nacimiento
-              <span>*</span>
-            </label>
-            <input type="date" id="fechaNacimiento" formControlName="fechaNacimiento">
-          </div>
-
-          <!-- CURP -->
-          <div class="form-group">
-            <label for="curp">
-              CURP
-              <span>*</span>
-            </label>
-            <input type="text" id="curp" placeholder="Ingresa la CURP" formControlName="CURP">
-          </div>
-
-          <!-- nss -->
-          <div class="form-group">
-            <label for="nss">
-              NSS
-            </label>
-            <input type="text" id="nss" placeholder="Ingresa el NSS" formControlName="NSS">
-          </div>
-
-          <!-- RFC -->
-          <div class="form-group">
-            <label for="rfc">
-              RFC
-            </label>
-            <input type="text" id="rfc" placeholder="Ingresa el RFC" formControlName="RFC">
-          </div>
-
-          <!-- Dirección -->
-          <div class="form-group form-group-full">
-            <label for="direccion">
-              Dirección Particular
-              <span>*</span>
-            </label>
-            <input type="text" id="direccion" placeholder="Ingresa la dirección completa" formControlName="direccion">
-          </div>
-
-          <!-- CURP -->
-          <div class="form-group">
-            <label for="nombreEmpresa">
-              Nombre de la Empresa en que trabaja
-              <span>*</span>
-            </label>
-            <input type="text" id="nombreEmpresa" placeholder="Ingresa el nombre de la Empresa"
-              formControlName="nombreEmpresa">
-          </div>
-
-          <!-- Dirección de la empresa -->
-          <div class="form-group">
-            <label for="domicilioEmpresa">
-              Dirección de la Empresa en que trabaja
-              <span>*</span>
-            </label>
-            <input type="text" id="domicilioEmpresa" placeholder="Ingresa la dirección de la empresa"
-              formControlName="domicilioEmpresa">
-          </div>
-
-          <!-- Ingresos mensuales -->
-          <div class="form-group">
-            <label for="ingresoMensual">
-              Ingresos estimados mensuales
-              <span></span>
-            </label>
-            <input type="number" id="ingresoMensual" placeholder="" formControlName="ingresosMensuales">
-          </div>
-        </form>
-        <div class="form-actions">
-          <span class="progress-text">
-            Paso {{pasoActual}} de 5
-          </span>
-          <button type="button" class="primary-button" (click)="volver()">
-            Volver a revisar los datos
-            <span>←</span>
-          </button>
-          <button type="button" class="primary-button" (click)="continuar()">
-            Continuar
-            <span>→</span>
-          </button>
-        </div>
-      </div>
-      }
-      @if (pasoActual === 3) {
-      <div class="form-card">
-        <div class="form-card-header">
-          <div>
-            <span class="eyebrow">SECCIÓN 03</span>
-            <h3>Datos de los Hijos</h3>
-          </div>
-          <span class="required-info">
-            * Campos obligatorios
-          </span>
-        </div>
-
-        @for (hijo of hijos; track $index; let i = $index) {
-        <div [formGroup]="hijo" class="child-card">
-
-          <div class="child-header">
-            <span class="form-group">Hijo {{ i + 1 }}</span>
-            <button type="button" class="danger-button" (click)="eliminarHijo(i)">
-              X
-            </button>
-          </div>
-
-          <div class="child-form-grid">
-
+          <form [formGroup]="formularioDemandante" class="form-grid">
             <!-- Nombre -->
             <div class="form-group form-group-large">
-              <label [for]="'nombre-' + i">
+              <label for="nombre">
                 Nombre completo
                 <span>*</span>
               </label>
-              <input type="text" [id]="'nombre-' + i" placeholder="Ingresa el nombre completo" formControlName="nombre">
+              <input
+                type="text"
+                id="nombre"
+                placeholder="Ingresa el nombre completo"
+                formControlName="nombre"
+              />
             </div>
 
             <!-- Edad -->
             <div class="form-group">
-              <label [for]="'edad-' + i">
+              <label for="edad">
                 Edad
                 <span>*</span>
               </label>
-              <input type="number" [id]="'edad-' + i" placeholder="Edad" formControlName="edad">
+              <input type="number" id="edad" placeholder="Ingresa la edad" formControlName="edad" />
+            </div>
+
+            <!-- Ocupación -->
+            <div class="form-group">
+              <label for="ocupacion">
+                Ocupación
+                <span>*</span>
+              </label>
+              <input
+                type="text"
+                id="ocupacion"
+                placeholder="Desempleado, Abogado, Cajero, etc."
+                formControlName="ocupacion"
+              />
             </div>
 
             <!-- Escolaridad -->
             <div class="form-group">
-              <label [for]="'escolaridad-' + i">
+              <label for="escolaridad">
                 Escolaridad
                 <span>*</span>
               </label>
-              <input type="text" [id]="'escolaridad-' + i" placeholder="Infante, Primaria, Secundaria..."
-                formControlName="escolaridad">
+              <input
+                type="text"
+                id="escolaridad"
+                placeholder="Primaria, Secundaria, Título"
+                formControlName="escolaridad"
+              />
             </div>
+
+            <!-- Teléfono -->
+            <div class="form-group">
+              <label for="telefono">
+                Teléfono
+                <span>*</span>
+              </label>
+              <input
+                type="tel"
+                id="telefono"
+                placeholder="Ingresa el teléfono de contacto"
+                formControlName="telefono"
+              />
+            </div>
+
+            <!-- Correo -->
+            <div class="form-group">
+              <label for="correo"> Correo electrónico </label>
+              <input
+                type="email"
+                id="correo"
+                placeholder="Ingresa el correo electrónico"
+                formControlName="correo"
+              />
+            </div>
+
+            <!-- Dirección -->
+            <div class="form-group form-group-full">
+              <label for="direccion">
+                Dirección
+                <span>*</span>
+              </label>
+              <input
+                type="text"
+                id="direccion"
+                placeholder="Ingresa la dirección completa"
+                formControlName="direccion"
+              />
+            </div>
+          </form>
+          <div class="form-actions">
+            <span class="progress-text">Paso {{ pasoActual }} <span>de 5</span></span>
+            <button type="button" class="primary-button" (click)="continuar()">
+              Continuar
+              <span aria-hidden="true">→</span>
+            </button>
           </div>
         </div>
-        }
-        <div class="child-actions">
-          <button type="button" class="secondary-button" (click)="agregarHijo()">
-            Agregar hijo</button>
-        </div>
+      }
+      @if (pasoActual === 2) {
+        <div class="form-card">
+          <div class="form-card-header">
+            <div>
+              <span class="eyebrow"
+                >SECCIÓN 02 <span aria-hidden="true">·</span> PARTE DEMANDADA</span
+              >
+              <h3>Datos de la parte demandada</h3>
+              <p>Datos de identificación, domicilio y actividad laboral.</p>
+            </div>
+            <span class="required-info"> <span aria-hidden="true">*</span> Campos señalados </span>
+          </div>
+          <form [formGroup]="formularioDemandado" class="form-grid">
+            <!-- Nombre -->
+            <div class="form-group form-group-large">
+              <label for="nombre">
+                Nombre completo
+                <span>*</span>
+              </label>
+              <input
+                type="text"
+                id="nombre"
+                placeholder="Ingresa el nombre completo"
+                formControlName="nombre"
+              />
+            </div>
 
-        <div class="form-actions">
-          <span class="progress-text">
-            Paso {{pasoActual}} de 5
-          </span>
-          <button type="button" class="primary-button" (click)="volver()">
-            Volver a revisar los datos
-            <span>←</span>
-          </button>
-          <button type="button" class="primary-button" (click)="continuar()">
-            Continuar
-            <span>→</span>
-          </button>
+            <!-- Edad -->
+            <div class="form-group">
+              <label for="edad">
+                Edad
+                <span>*</span>
+              </label>
+              <input type="number" id="edad" placeholder="Ingresa la edad" formControlName="edad" />
+            </div>
+
+            <!-- Ocupación -->
+            <div class="form-group">
+              <label for="ocupacion">
+                Ocupación
+                <span>*</span>
+              </label>
+              <input
+                type="text"
+                id="ocupacion"
+                placeholder="Desempleado, Abogado, Cajero, etc."
+                formControlName="ocupacion"
+              />
+            </div>
+
+            <!-- Escolaridad -->
+            <div class="form-group">
+              <label for="escolaridad">
+                Escolaridad
+                <span>*</span>
+              </label>
+              <input
+                type="text"
+                id="escolaridad"
+                placeholder="Primaria, Secundaria, Título"
+                formControlName="escolaridad"
+              />
+            </div>
+
+            <!-- fecha de nacimiento -->
+            <div class="form-group">
+              <label for="fechaNacimiento">
+                Fecha de nacimiento
+                <span>*</span>
+              </label>
+              <input type="date" id="fechaNacimiento" formControlName="fechaNacimiento" />
+            </div>
+
+            <!-- CURP -->
+            <div class="form-group">
+              <label for="curp">
+                CURP
+                <span>*</span>
+              </label>
+              <input type="text" id="curp" placeholder="Ingresa la CURP" formControlName="CURP" />
+            </div>
+
+            <!-- nss -->
+            <div class="form-group">
+              <label for="nss"> NSS </label>
+              <input type="text" id="nss" placeholder="Ingresa el NSS" formControlName="NSS" />
+            </div>
+
+            <!-- RFC -->
+            <div class="form-group">
+              <label for="rfc"> RFC </label>
+              <input type="text" id="rfc" placeholder="Ingresa el RFC" formControlName="RFC" />
+            </div>
+
+            <!-- Dirección -->
+            <div class="form-group form-group-full">
+              <label for="direccion">
+                Dirección Particular
+                <span>*</span>
+              </label>
+              <input
+                type="text"
+                id="direccion"
+                placeholder="Ingresa la dirección completa"
+                formControlName="direccion"
+              />
+            </div>
+
+            <!-- CURP -->
+            <div class="form-group">
+              <label for="nombreEmpresa">
+                Nombre de la Empresa en que trabaja
+                <span>*</span>
+              </label>
+              <input
+                type="text"
+                id="nombreEmpresa"
+                placeholder="Ingresa el nombre de la Empresa"
+                formControlName="nombreEmpresa"
+              />
+            </div>
+
+            <!-- Dirección de la empresa -->
+            <div class="form-group">
+              <label for="domicilioEmpresa">
+                Dirección de la Empresa en que trabaja
+                <span>*</span>
+              </label>
+              <input
+                type="text"
+                id="domicilioEmpresa"
+                placeholder="Ingresa la dirección de la empresa"
+                formControlName="domicilioEmpresa"
+              />
+            </div>
+
+            <!-- Ingresos mensuales -->
+            <div class="form-group">
+              <label for="ingresoMensual">
+                Ingresos estimados mensuales
+                <span></span>
+              </label>
+              <input
+                type="number"
+                id="ingresoMensual"
+                placeholder=""
+                formControlName="ingresosMensuales"
+              />
+            </div>
+          </form>
+          <div class="form-actions">
+            <button type="button" class="secondary-button" (click)="volver()">
+              <span aria-hidden="true">←</span> Anterior
+            </button>
+            <span class="progress-text">Paso {{ pasoActual }} <span>de 5</span></span>
+            <button type="button" class="primary-button" (click)="continuar()">
+              Continuar
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
         </div>
-      </div>
+      }
+      @if (pasoActual === 3) {
+        <div class="form-card">
+          <div class="form-card-header">
+            <div>
+              <span class="eyebrow"
+                >SECCIÓN 03 <span aria-hidden="true">·</span> PERSONAS BENEFICIARIAS</span
+              >
+              <h3>Hijas e hijos</h3>
+              <p>Agrega a cada persona menor de edad incluida en el caso.</p>
+            </div>
+            <span class="required-info"> <span aria-hidden="true">*</span> Campos señalados </span>
+          </div>
+
+          @for (hijo of hijos; track $index; let i = $index) {
+            <div [formGroup]="hijo" class="child-card">
+              <div class="child-header">
+                <span class="child-title">Hija o hijo {{ i + 1 }}</span>
+                <button
+                  type="button"
+                  class="danger-button"
+                  [attr.aria-label]="'Eliminar hija o hijo ' + (i + 1)"
+                  (click)="eliminarHijo(i)"
+                >
+                  <span aria-hidden="true">×</span>
+                </button>
+              </div>
+
+              <div class="child-form-grid">
+                <!-- Nombre -->
+                <div class="form-group form-group-large">
+                  <label [for]="'nombre-' + i">
+                    Nombre completo
+                    <span>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    [id]="'nombre-' + i"
+                    placeholder="Ingresa el nombre completo"
+                    formControlName="nombre"
+                  />
+                </div>
+
+                <!-- Edad -->
+                <div class="form-group">
+                  <label [for]="'edad-' + i">
+                    Edad
+                    <span>*</span>
+                  </label>
+                  <input
+                    type="number"
+                    [id]="'edad-' + i"
+                    placeholder="Edad"
+                    formControlName="edad"
+                  />
+                </div>
+
+                <!-- Escolaridad -->
+                <div class="form-group">
+                  <label [for]="'escolaridad-' + i">
+                    Escolaridad
+                    <span>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    [id]="'escolaridad-' + i"
+                    placeholder="Infante, Primaria, Secundaria..."
+                    formControlName="escolaridad"
+                  />
+                </div>
+              </div>
+            </div>
+          }
+          <div class="child-actions">
+            <button type="button" class="secondary-button" (click)="agregarHijo()">
+              <span aria-hidden="true">＋</span> Agregar hija o hijo
+            </button>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="secondary-button" (click)="volver()">
+              <span aria-hidden="true">←</span> Anterior
+            </button>
+            <span class="progress-text">Paso {{ pasoActual }} <span>de 5</span></span>
+            <button type="button" class="primary-button" (click)="continuar()">
+              Continuar
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        </div>
       }
       @if (pasoActual === 4) {
-
-      <div class="form-card">
-        <div class="form-card-header">
-          <div>
-            <span class="eyebrow">
-              SECCIÓN 04
-            </span>
-            <h3>
-              Gastos mensuales de los menores
-            </h3>
+        <div class="form-card">
+          <div class="form-card-header">
+            <div>
+              <span class="eyebrow">
+                SECCIÓN 04 <span aria-hidden="true">·</span> MANUTENCIÓN
+              </span>
+              <h3>Gastos y necesidades</h3>
+              <p>Indica los montos aproximados y su periodicidad para dar contexto al caso.</p>
+            </div>
+            <span class="required-info"> Complete los montos aproximados. </span>
           </div>
-          <span class="required-info">
-            Complete los montos aproximados.
-          </span>
+          <form [formGroup]="formularioGastos">
+            <div class="expense-table-wrapper">
+              <table class="expense-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Concepto</th>
+                    <th scope="col">Descripción</th>
+                    <th scope="col">Periodicidad</th>
+                    <th scope="col">Monto (MXN)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (concepto of conceptosGasto; track concepto.clave) {
+                    <tr>
+                      <th scope="row">
+                        <strong>{{ concepto.nombre }}</strong>
+                      </th>
+                      <td>
+                        {{ concepto.descripcion }}
+                      </td>
+                      <td>
+                        {{ concepto.periodo }}
+                      </td>
+                      <td [formGroupName]="concepto.clave">
+                        <label class="visually-hidden" [for]="'gasto-' + concepto.clave"
+                          >Monto para {{ concepto.nombre }}</label
+                        >
+                        <span aria-hidden="true">$</span>
+                        <input
+                          [id]="'gasto-' + concepto.clave"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          formControlName="monto"
+                        />
+                        <span class="currency-suffix">MXN</span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="3">
+                      <strong>Total Estimado de gastos mensuales</strong>
+                    </td>
+                    <td>
+                      <strong>${{ totalGastos }} MXN</strong>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </form>
+          <div class="form-actions">
+            <button type="button" class="secondary-button" (click)="volver()">
+              <span aria-hidden="true">←</span> Anterior
+            </button>
+            <span class="progress-text">Paso {{ pasoActual }} <span>de 5</span></span>
+            <button type="button" class="primary-button" (click)="continuar()">
+              Revisar el caso <span aria-hidden="true">→</span>
+            </button>
+          </div>
         </div>
-        <form [formGroup]="formularioGastos">
-          <table class="expense-table">
-            <thead>
-              <tr>
-                <th>Concepto</th>
-                <th>Descripción</th>
-                <th>Periodicidad</th>
-                <th>Monto ($)</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for(concepto of conceptosGasto; track concepto.clave){
-              <tr>
-                <td>
-                  <strong>{{ concepto.nombre }}</strong>
-                </td>
-                <td>
-                  {{ concepto.descripcion }}
-                </td>
-                <td>
-                  {{ concepto.periodo }}
-                </td>
-                <td [formGroupName]="concepto.clave">
-                  $ <input type="number" formControlName="monto">/100 M.N.
-                </td>
-              </tr>
-              }
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colspan="3">
-                  <strong>Total Estimado de gastos mensuales</strong>
-                </td>
-                <td>
-                  <strong>${{ totalGastos }} MXN</strong>
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </form>
-        <div class="form-actions">
-          <span class="progress-text">
-            Paso {{ pasoActual }} de 5
-          </span>
-          <button type="button" class="primary-button" (click)="volver()">
-            Volver a revisar los datos
-            <span>←</span>
-          </button>
-          <button type="button" class="primary-button" (click)="continuar()">
-            Continuar →
-          </button>
-        </div>
-      </div>
       }
-      @if(pasoActual == 5){
-        <app-revision-caso></app-revision-caso>
+      @if (pasoActual === 5) {
+        <app-revision-caso
+          [templateFile]="templateFile()"
+          (backToEdit)="volverDesdeRevision()"
+        ></app-revision-caso>
       }
     </section>
   </main>

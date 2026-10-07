@@ -1,17 +1,31 @@
-<div class="container mt-4">
+<section class="template-loader" aria-labelledby="template-loader-title">
+  <div class="template-copy">
+    <span class="file-badge" aria-hidden="true">DOCX</span>
+    <div>
+      <h4 id="template-loader-title">Plantilla Word del caso</h4>
+      <p>Se usará localmente para completar los campos y descargar una copia.</p>
+    </div>
+  </div>
 
-    <button
-        class="btn btn-primary"
-        (click)="fileInput.click()">
+  <button type="button" class="template-button" (click)="fileInput.click()">
+    Seleccionar archivo
+    <span aria-hidden="true">↑</span>
+  </button>
+  <input
+    #fileInput
+    class="template-file-input"
+    type="file"
+    accept=".docx"
+    hidden
+    aria-label="Seleccionar archivo de plantilla Word"
+    aria-hidden="true"
+    tabindex="-1"
+    (change)="onFileSelected($event)"
+  />
 
-        Seleccionar plantilla
-
-    </button>
-
-    <input
-        #fileInput
-        type="file"
-        accept=".docx"
-        (change)="onFileSelected($event)">
-
-</div>
+  @if (fileFeedback()) {
+    <p class="template-feedback" [class.error]="fileError()" aria-live="polite">
+      {{ fileFeedback() }}
+    </p>
+  }
+</section>

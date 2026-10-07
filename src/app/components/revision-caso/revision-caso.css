@@ -2,176 +2,140 @@
   display: block;
 }
 
-
-/* ================================
-   CONTENEDOR GENERAL
-================================ */
-
 .revision-container {
-  min-height: 100vh;
-  padding: 40px 52px 60px;
-  background: #f5f7fb;
+  min-height: 100%;
+  padding: 4px 0 18px;
+  color: var(--color-ink, #243b3a);
 }
 
-
-/* ================================
-   CABECERA
-================================ */
-
 .revision-header {
-  max-width: 1100px;
-  margin: 0 auto 28px;
-
   display: flex;
+  max-width: 1100px;
   align-items: flex-start;
   justify-content: space-between;
+  gap: 22px;
+  margin: 0 auto 23px;
 }
 
 .eyebrow {
-  color: #6b7280;
+  color: var(--color-copper, #a96f4b);
   font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.eyebrow span {
+  padding: 0 3px;
+  color: #c69b73;
 }
 
 .revision-header h2 {
-  margin: 6px 0 6px;
-
-  color: #111827;
-  font-size: 28px;
+  margin: 7px 0 6px;
+  color: #183a38;
+  font-family: var(--font-display, Georgia, serif);
+  font-size: clamp(25px, 3vw, 33px);
+  font-weight: 500;
+  letter-spacing: -0.035em;
 }
 
 .revision-header p {
   margin: 0;
-
-  color: #6b7280;
-  font-size: 14px;
+  color: #748077;
+  font-size: 12px;
+  line-height: 1.55;
 }
 
 .revision-status {
-  display: flex;
+  display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 8px;
-
-  padding: 8px 12px;
-
-  border: 1px solid #e5e7eb;
+  padding: 9px 13px;
+  border: 1px solid #dce5d9;
   border-radius: 999px;
-
-  background: #ffffff;
-
-  color: #6b7280;
-  font-size: 12px;
+  background: #f5f8f1;
+  color: #536e58;
+  font-size: 10px;
+  font-weight: 700;
 }
 
 .status-dot {
-  width: 8px;
-  height: 8px;
-
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-
-  background: #22c55e;
+  background: #6a9b74;
+  box-shadow: 0 0 0 3px rgb(106 155 116 / 15%);
 }
-
-
-/* ================================
-   CONTENEDOR DEL DOCUMENTO
-================================ */
 
 .document-wrapper {
-  max-width: 1100px;
-  margin: 0 auto;
-
   display: flex;
+  max-width: 1100px;
   justify-content: center;
+  margin: 0 auto;
 }
-
-
-/* ================================
-   HOJA
-================================ */
 
 .legal-document {
-  width: 850px;
+  width: min(100%, 850px);
   min-height: 1100px;
-
   padding: 70px 80px;
-
-  background: #ffffff;
-
+  background: #fffefa;
   box-shadow:
-    0 10px 30px rgba(15, 23, 42, 0.12);
-
-  color: #111827;
-
-  font-family:
-    Georgia,
-    'Times New Roman',
-    serif;
-
+    0 18px 50px rgb(54 48 35 / 13%),
+    0 2px 7px rgb(54 48 35 / 7%);
+  color: #232923;
+  font-family: Georgia, 'Times New Roman', serif;
   font-size: 15px;
-  line-height: 1.75;
+  line-height: 1.76;
 }
-
-
-/* ================================
-   ENCABEZADO DOCUMENTO
-================================ */
 
 .document-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-
-  margin-bottom: 55px;
+  gap: 15px;
+  margin-bottom: 52px;
 }
 
 .logo-placeholder {
-  width: 90px;
-  height: 75px;
-
   display: flex;
+  width: 90px;
+  min-height: 68px;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-
-  border: 1px solid #e5e7eb;
-
-  color: #9ca3af;
-
-  font-family: Arial, sans-serif;
-  font-size: 11px;
-  font-weight: 700;
+  border: 1px solid #e4e2d9;
+  color: #84877f;
+  font-family: var(--font-sans, Arial, sans-serif);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
   text-align: center;
 }
 
 .logo-placeholder.women {
-  width: 120px;
+  width: 112px;
 }
 
 .institution {
   display: flex;
+  flex: 1;
   flex-direction: column;
-
+  padding-top: 8px;
+  color: #353a34;
+  font-family: var(--font-sans, Arial, sans-serif);
+  font-size: 10px;
   text-align: center;
-
-  font-family: Arial, sans-serif;
-  font-size: 11px;
 }
 
 .institution span {
-  margin-top: 4px;
-
-  color: #6b7280;
+  margin-top: 5px;
+  color: #757970;
+  font-size: 9px;
+  letter-spacing: 0.04em;
 }
 
-
-/* ================================
-   DESTINATARIO
-================================ */
-
 .recipient {
-  margin-bottom: 40px;
-
+  margin-bottom: 38px;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -180,99 +144,66 @@
   margin: 0 0 4px;
 }
 
-
-/* ================================
-   CUERPO
-================================ */
-
 .document-body {
   text-align: justify;
+  hyphens: auto;
 }
 
 .document-body p {
-  margin: 0 0 22px;
+  margin: 0 0 21px;
 }
 
-
-/* ================================
-   DATOS DINÁMICOS
-================================ */
-
 .dynamic-value {
-  padding: 2px 4px;
-
-  border-radius: 3px;
-
-  background: #fff3a6;
-
+  padding: 1px 3px;
+  border-radius: 2px;
+  background: #eef2e6;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
-
-  transition:
-    background 0.2s ease;
+  transition: background-color 0.18s ease;
 }
 
 .dynamic-value:hover {
-  background: #ffe66d;
+  background: #e0e9d6;
 }
-
-
-/* ================================
-   TÍTULOS JURÍDICOS
-================================ */
 
 .document-title {
-  margin: 45px 0 25px;
-
+  margin: 38px 0 21px;
+  color: #293d35;
+  font-size: 16px;
+  letter-spacing: 0.07em;
   text-align: center;
-
-  font-size: 17px;
-
-  letter-spacing: 0.08em;
 }
 
-
-/* ================================
-   PRESTACIONES
-================================ */
-
-.claims {
-  margin: 0 0 35px;
-
-  padding-left: 30px;
-}
-
-.claims li {
-  margin-bottom: 16px;
-}
-
+.claims,
 .numbered-section,
 .evidence-list {
-  margin: 0 0 26px;
-  padding-left: 30px;
+  margin: 0 0 25px;
+  padding-left: 29px;
 }
 
+.claims li,
 .numbered-section li,
 .evidence-list li {
-  margin-bottom: 14px;
+  margin-bottom: 13px;
   padding-left: 4px;
 }
 
 .expense-table-wrapper {
-  margin: 8px 0 30px;
+  margin: 8px 0 27px;
   overflow-x: auto;
 }
 
 .expense-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-family: var(--font-sans, Arial, sans-serif);
+  font-size: 11px;
   text-align: left;
 }
 
 .expense-table caption {
-  padding: 0 0 10px;
-  color: #374151;
+  padding: 0 0 9px;
+  color: #3e4a41;
   font-weight: 700;
   text-align: left;
 }
@@ -280,176 +211,263 @@
 .expense-table th,
 .expense-table td {
   padding: 9px 10px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #dddcd4;
 }
 
 .expense-table thead {
-  background: #f3f4f6;
+  background: #f0f1e9;
 }
 
 .signature {
-  margin: 55px 0 35px;
+  margin: 50px 0 33px;
   text-align: center;
 }
 
 .signature strong {
   display: inline-block;
-  margin-top: 42px;
+  margin-top: 38px;
   text-transform: uppercase;
 }
 
 .annexes ul {
   margin: 0 0 20px;
-  padding-left: 30px;
+  padding-left: 28px;
 }
 
 .annexes li {
-  margin-bottom: 8px;
+  margin-bottom: 7px;
 }
 
-
-/* ================================
-   RESUMEN EXPEDIENTE
-================================ */
-
 .case-summary {
-  margin-top: 60px;
-  padding-top: 20px;
-
-  border-top: 1px solid #d1d5db;
+  margin-top: 54px;
+  padding-top: 18px;
+  border-top: 1px solid #d9d8d0;
+  font-family: var(--font-sans, Arial, sans-serif);
 }
 
 .case-summary h3 {
-  margin: 0 0 18px;
-
-  font-family: Arial, sans-serif;
-  font-size: 14px;
+  margin: 0 0 13px;
+  color: #46534b;
+  font-size: 12px;
 }
 
 .case-row {
   display: flex;
   justify-content: space-between;
-
+  gap: 20px;
   padding: 8px 0;
-
-  border-bottom: 1px solid #f3f4f6;
-
-  font-family: Arial, sans-serif;
-  font-size: 12px;
+  border-bottom: 1px solid #efeee8;
+  font-size: 10px;
 }
 
-
-/* ================================
-   ACCIONES
-================================ */
+.case-row strong {
+  text-align: right;
+}
 
 .revision-actions {
-  max-width: 1100px;
-  margin: 28px auto 0;
-
   display: flex;
+  max-width: 1100px;
   align-items: center;
   justify-content: space-between;
+  gap: 18px;
+  margin: 22px auto 0;
 }
 
 .action-right {
   display: flex;
   align-items: center;
-  gap: 18px;
+  justify-content: flex-end;
+  gap: 14px;
 }
 
 .revision-help {
-  color: #9ca3af;
-  font-size: 12px;
+  color: #79847b;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.generation-feedback {
+  flex: 0 0 100%;
+  margin: -7px 0 0;
+  color: #426b4b;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.generation-feedback.error {
+  color: #a14432;
 }
 
 .primary-button,
 .secondary-button {
-  padding: 11px 18px;
-
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 15px;
   border-radius: 8px;
-
   font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-
+  font-size: 10px;
+  font-weight: 700;
   cursor: pointer;
-
   transition:
-    background 0.2s ease,
-    transform 0.2s ease;
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
 }
 
 .primary-button {
-  border: none;
-
-  background: #111827;
-  color: #ffffff;
+  border: 1px solid #1b4944;
+  background: #1b4944;
+  color: #fffdf8;
 }
 
-.primary-button:hover {
-  background: #374151;
-
+.primary-button:hover:not(:disabled) {
   transform: translateY(-1px);
+  background: #28645a;
+}
+
+.primary-button:disabled {
+  border-color: #d9ddd4;
+  background: #e9ece5;
+  color: #747e74;
+  cursor: not-allowed;
+}
+
+.primary-button:disabled:hover {
+  transform: none;
 }
 
 .secondary-button {
-  border: 1px solid #d1d5db;
-
-  background: #ffffff;
-  color: #374151;
+  border: 1px solid #d9ded5;
+  background: #fffefa;
+  color: #52625a;
 }
 
 .secondary-button:hover {
-  background: #f9fafb;
+  border-color: #b7c7b8;
+  background: #f1f4ed;
+  color: #254b43;
 }
 
-
-/* ================================
-   RESPONSIVE
-================================ */
+.primary-button:focus-visible,
+.secondary-button:focus-visible {
+  outline: 3px solid #b97c53;
+  outline-offset: 3px;
+}
 
 @media (max-width: 900px) {
-
-  .revision-container {
-    padding: 28px;
-  }
-
   .legal-document {
-    width: 100%;
-
-    padding: 50px;
+    min-height: 0;
+    padding: 52px;
   }
-
 }
 
-
 @media (max-width: 650px) {
-
   .revision-container {
-    padding: 20px;
+    padding-top: 0;
   }
 
   .revision-header {
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
+    margin-bottom: 17px;
   }
 
   .legal-document {
-    padding: 35px 25px;
+    padding: 34px 23px;
+    font-size: 13px;
+    line-height: 1.68;
+  }
 
+  .document-header {
+    gap: 7px;
+    margin-bottom: 36px;
+  }
+
+  .logo-placeholder {
+    width: 55px;
+    min-height: 48px;
+    font-size: 8px;
+  }
+
+  .logo-placeholder.women {
+    width: 63px;
+  }
+
+  .institution {
+    padding-top: 2px;
+    font-size: 8px;
+  }
+
+  .institution span {
+    font-size: 7px;
+  }
+
+  .recipient {
+    margin-bottom: 28px;
+  }
+
+  .document-title {
     font-size: 14px;
   }
 
-  .revision-actions {
-    flex-direction: column;
-    gap: 15px;
+  .revision-actions,
+  .action-right {
     align-items: stretch;
+    flex-direction: column;
+  }
+
+  .revision-actions {
+    margin-top: 17px;
   }
 
   .action-right {
-    flex-direction: column;
-    align-items: stretch;
+    gap: 9px;
   }
 
+  .revision-help {
+    order: 1;
+  }
+
+  .generation-feedback {
+    order: 2;
+  }
+}
+
+@media print {
+  :host {
+    color: #000000;
+  }
+
+  .revision-container {
+    padding: 0;
+    background: #ffffff;
+  }
+
+  .revision-header,
+  .revision-actions {
+    display: none;
+  }
+
+  .document-wrapper {
+    display: block;
+    max-width: none;
+  }
+
+  .legal-document {
+    width: 100%;
+    min-height: 0;
+    padding: 0;
+    box-shadow: none;
+    font-size: 11pt;
+  }
+
+  .expense-table tr,
+  .signature,
+  .case-summary {
+    break-inside: avoid;
+  }
 }
