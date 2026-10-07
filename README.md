@@ -48,7 +48,9 @@ DocuJurado es una aplicación estática. No incluye un servidor propio para guar
 
 ## Despliegue en GitHub Pages
 
-El workflow de GitHub Actions compila Angular para la ruta `/DocuJurado/` y publica únicamente `dist/DocuJurado/browser`. Para activarlo en el repositorio, selecciona **Settings → Pages → Build and deployment → Source: GitHub Actions**. Los cambios enviados a `master` ejecutan el despliegue automáticamente; también se puede iniciar manualmente desde la pestaña **Actions**.
+El workflow de GitHub Actions compila Angular para la ruta `/DocuJurado/` y publica únicamente `dist/DocuJurado/browser`. En el repositorio selecciona **Settings → Pages → Build and deployment → Source: GitHub Actions**. No uses a la vez el origen “Deploy from a branch”: el despliegue Jekyll de esa opción puede publicar el README encima de la app. Los cambios enviados a `master` ejecutan el workflow automáticamente.
+
+Si falla `npm ci` o la compilación Angular, el workflow publica una página de contingencia con las últimas líneas del error y un botón para volver a intentar. Para mostrar un contacto por correo, configura la variable de repositorio `DOCUJURADO_CONTACT_EMAIL` en **Settings → Secrets and variables → Actions → Variables**. El diagnóstico se sirve en una página pública, así que no incluyas secretos ni datos personales en los logs de build.
 
 ## Tecnologías
 

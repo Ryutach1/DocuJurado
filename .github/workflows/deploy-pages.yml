@@ -31,14 +31,120 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Install dependencies
-        run: npm ci
-
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
       - name: Build Angular application
-        run: npx ng build --base-href=/DocuJurado/
+        id: build
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          set +o pipefail
+          log_file="$RUNNER_TEMP/docujurado-build.log"
+          : > "$log_file"
+
+          npm ci 2>&1 | tee -a "$log_file"
+          command_status=${PIPESTATUS[0]}
+          if [ "$command_status" -ne 0 ]; then
+            echo "stage=dependency-install" >> "$GITHUB_OUTPUT"
+            exit "$command_status"
+          fi
+
+          npx ng build --base-href=/DocuJurado/ 2>&1 | tee -a "$log_file"
+          command_status=${PIPESTATUS[0]}
+          if [ "$command_status" -ne 0 ]; then
+            echo "stage=angular-build" >> "$GITHUB_OUTPUT"
+            exit "$command_status"
+          fi
+
+          echo "stage=success" >> "$GITHUB_OUTPUT"
+
+      - name: Create public build-error page
+        if: steps.build.outcome == 'failure'
+        env:
+          CONTACT_EMAIL: ${{ vars.DOCUJURADO_CONTACT_EMAIL }}
+          FAILURE_STAGE: ${{ steps.build.outputs.stage }}
+          BUILD_LOG: ${{ runner.temp }}/docujurado-build.log
+          COMMIT_SHA: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          mkdir -p dist/DocuJurado/browser
+          node <<'NODE'
+          const fs = require('node:fs');
+
+          const escapeHtml = (value) => value.replace(/[&<>"']/g, (char) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+          })[char]);
+
+          const log = fs.existsSync(process.env.BUILD_LOG)
+            ? fs.readFileSync(process.env.BUILD_LOG, 'utf8')
+            : 'El workflow no pudo generar el registro de compilación.';
+          const sanitizedLog = log
+            .replace(/\u001b\[[0-9;]*m/g, '')
+            .replace(/(access_token|refresh_token|client_secret)\s*[:=]\s*\S+/gi, '$1=[REDACTED]')
+            .split('\n')
+            .slice(-80)
+            .join('\n')
+            .slice(-16000);
+          const contactEmail = process.env.CONTACT_EMAIL || '';
+          const emailCard = contactEmail
+            ? `<a class="contact" href="mailto:${escapeHtml(contactEmail)}">Contactar al propietario por correo</a>`
+            : '<p class="contact-note">El propietario todavía no ha configurado un correo de contacto.</p>';
+          const stage = process.env.FAILURE_STAGE === 'dependency-install'
+            ? 'instalación de dependencias'
+            : 'compilación de Angular';
+
+          const html = `<!doctype html>
+          <html lang="es">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta name="robots" content="noindex">
+            <title>DocuJurado | Servicio temporalmente no disponible</title>
+            <style>
+              :root{color-scheme:light;font-family:Inter,Arial,sans-serif;color:#1f2937;background:#f3f6fb}
+              *{box-sizing:border-box}
+              body{min-height:100vh;margin:0;display:grid;place-items:center;padding:24px}
+              main{width:min(760px,100%);padding:clamp(24px,5vw,44px);border:1px solid #e5e7eb;border-radius:20px;background:#fff;box-shadow:0 18px 55px #0f172a18}
+              .brand{color:#1d4ed8;font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+              h1{margin:12px 0;color:#111827;font-size:clamp(25px,5vw,36px)}
+              p{line-height:1.65}
+              .notice{padding:16px;border-left:4px solid #f59e0b;border-radius:8px;background:#fffbeb}
+              .actions{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0}
+              .button,.contact{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:10px 15px;border:0;border-radius:9px;background:#1d4ed8;color:#fff;font-weight:700;text-decoration:none;cursor:pointer}
+              .contact{background:#111827}
+              .contact-note{color:#6b7280;font-size:13px}
+              details{margin-top:24px;border:1px solid #e5e7eb;border-radius:10px}
+              summary{padding:13px;font-weight:700;cursor:pointer}
+              pre{max-height:360px;margin:0;padding:14px;overflow:auto;border-radius:0 0 10px 10px;background:#111827;color:#e5e7eb;font:12px/1.55 ui-monospace,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+              .meta{margin-top:18px;color:#6b7280;font-size:12px}
+            </style>
+          </head>
+          <body>
+            <main>
+              <div class="brand">DocuJurado</div>
+              <h1>Estamos actualizando el sitio</h1>
+              <p class="notice">No fue posible publicar la aplicación debido a un error durante la ${escapeHtml(stage)}. Contacte con el propietario del repositorio para mayor información e inténtelo nuevamente más tarde.</p>
+              <div class="actions">
+                <button class="button" type="button" onclick="location.reload()">Intentar de nuevo</button>
+                ${emailCard}
+              </div>
+              <details>
+                <summary>Ver error técnico del despliegue</summary>
+                <pre>${escapeHtml(sanitizedLog || 'El comando falló sin producir salida de error.')}</pre>
+              </details>
+              <p class="meta">Commit: ${escapeHtml((process.env.COMMIT_SHA || '').slice(0, 7))} · <a href="${escapeHtml(process.env.RUN_URL || '#')}" rel="noopener noreferrer">Ver ejecución completa de GitHub Actions</a></p>
+            </main>
+          </body>
+          </html>`;
+
+          fs.writeFileSync('dist/DocuJurado/browser/index.html', html);
+          NODE
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -48,3 +154,9 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Mark deployment as degraded when the fallback is published
+        if: steps.build.outcome == 'failure'
+        run: |
+          echo "::error::La compilación falló. Se publicó la página de contingencia con el diagnóstico."
+          exit 1
