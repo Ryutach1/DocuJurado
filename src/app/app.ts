@@ -19,7 +19,10 @@ export class App {
   private casoService = inject(CasoService);
   readonly templateFile = signal<File | null>(null);
   readonly plantillasPorTipo = signal<
-    Record<TipoDocumento | 'pension-con-relacion-laboral' | 'pension-sin-relacion-laboral', File | null>
+    Record<
+      TipoDocumento | 'pension-con-relacion-laboral' | 'pension-sin-relacion-laboral',
+      File | null
+    >
   >({
     pension: null,
     'pension-con-relacion-laboral': null,
@@ -29,11 +32,12 @@ export class App {
   });
   readonly tipoDocumento = signal<TipoDocumento>('pension');
   readonly nombrePlantillaActual = computed(() => this.templateFile()?.name ?? null);
-  private readonly documentosDisponibles: { id: TipoDocumento; nombre: string; detalle: string }[] = [
-    { id: 'pension', nombre: 'Pensión alimenticia', detalle: 'Con o sin relación laboral' },
-    { id: 'divorcio', nombre: 'Divorcio', detalle: 'Documento principal' },
-    { id: 'separacion', nombre: 'Separación provisional', detalle: 'Documento opcional' },
-  ];
+  private readonly documentosDisponibles: { id: TipoDocumento; nombre: string; detalle: string }[] =
+    [
+      { id: 'pension', nombre: 'Pensión alimenticia', detalle: 'Con o sin relación laboral' },
+      { id: 'divorcio', nombre: 'Divorcio', detalle: 'Documento principal' },
+      { id: 'separacion', nombre: 'Separación provisional', detalle: 'Documento opcional' },
+    ];
   get tiposDocumento(): { id: TipoDocumento; nombre: string; detalle: string }[] {
     return this.documentosDisponibles.filter(
       (documento) =>
@@ -77,6 +81,12 @@ export class App {
     correo: new FormControl('', { nonNullable: true }),
 
     direccion: new FormControl('', { nonNullable: true }),
+
+    ingresosMensuales: new FormControl(0, { nonNullable: true }),
+
+    clabeInterbancaria: new FormControl('', { nonNullable: true }),
+
+    banco: new FormControl('', { nonNullable: true }),
   });
 
   formularioDemandado = new FormGroup({
@@ -90,12 +100,21 @@ export class App {
 
     direccion: new FormControl('', { nonNullable: true }),
 
+    lugarNacimiento: new FormControl('', { nonNullable: true }),
+
+    fechaNacimiento: new FormControl('', { nonNullable: true }),
+
+    curp: new FormControl('', { nonNullable: true }),
+
+    nss: new FormControl('', { nonNullable: true }),
+
+    rfc: new FormControl('', { nonNullable: true }),
+
     nombreEmpresa: new FormControl('', { nonNullable: true }),
 
     domicilioEmpresa: new FormControl('', { nonNullable: true }),
 
     ingresosMensuales: new FormControl(0, { nonNullable: true }),
-
   });
 
   formularioHijos = new FormArray<
@@ -103,6 +122,7 @@ export class App {
       nombre: FormControl<string>;
       edad: FormControl<number>;
       escolaridad: FormControl<string>;
+      generoGramatical: FormControl<'' | 'femenino' | 'masculino'>;
       identificadorElectronicoNacimiento: FormControl<string>;
     }>
   >([]);
@@ -151,6 +171,10 @@ export class App {
         edad: new FormControl(0, { nonNullable: true }),
 
         escolaridad: new FormControl('', { nonNullable: true }),
+
+        generoGramatical: new FormControl<'' | 'femenino' | 'masculino'>('', {
+          nonNullable: true,
+        }),
 
         identificadorElectronicoNacimiento: new FormControl('', { nonNullable: true }),
       }),
@@ -375,9 +399,7 @@ export class App {
   }
 
   private get clavePlantillaActual():
-    | TipoDocumento
-    | 'pension-con-relacion-laboral'
-    | 'pension-sin-relacion-laboral' {
+    TipoDocumento | 'pension-con-relacion-laboral' | 'pension-sin-relacion-laboral' {
     if (this.tipoDocumento() !== 'pension') {
       return this.tipoDocumento();
     }

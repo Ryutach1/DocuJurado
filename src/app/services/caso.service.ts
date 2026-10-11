@@ -26,6 +26,9 @@ export class CasoService {
       telefono: '',
       correo: '',
       direccion: '',
+      ingresosMensuales: 0,
+      clabeInterbancaria: '',
+      banco: '',
     },
 
     demandado: {
@@ -34,6 +37,11 @@ export class CasoService {
       ocupacion: '',
       escolaridad: '',
       direccion: '',
+      lugarNacimiento: '',
+      fechaNacimiento: '',
+      curp: '',
+      nss: '',
+      rfc: '',
       nombreEmpresa: '',
       domicilioEmpresa: '',
       ingresosMensuales: 0,
@@ -230,6 +238,9 @@ export class CasoService {
         telefono: '',
         correo: '',
         direccion: '',
+        ingresosMensuales: 0,
+        clabeInterbancaria: '',
+        banco: '',
       },
 
       demandado: {
@@ -238,6 +249,11 @@ export class CasoService {
         ocupacion: '',
         escolaridad: '',
         direccion: '',
+        lugarNacimiento: '',
+        fechaNacimiento: '',
+        curp: '',
+        nss: '',
+        rfc: '',
         nombreEmpresa: '',
         domicilioEmpresa: '',
         ingresosMensuales: 0,

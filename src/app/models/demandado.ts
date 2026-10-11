@@ -9,10 +9,19 @@ export interface Demandado {
 
   direccion: string;
 
+  lugarNacimiento?: string;
+
+  fechaNacimiento?: string;
+
+  curp?: string;
+
+  nss?: string;
+
+  rfc?: string;
+
   nombreEmpresa: string;
 
   domicilioEmpresa: string;
 
   ingresosMensuales?: number;
-
 }

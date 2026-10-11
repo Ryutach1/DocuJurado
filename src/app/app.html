@@ -76,7 +76,7 @@
     </div>
 
     <div class="sidebar-footer">
-      <span class="version-label">Versión 0.1.8 · En desarrollo</span>
+      <span class="version-label">Versión 0.1.9 · En desarrollo</span>
       <span>Los datos de prueba no deben ser reales.</span>
     </div>
   </aside>
@@ -137,7 +137,9 @@
                 >SECCIÓN 01 <span aria-hidden="true">·</span> PERSONA PROMOVENTE</span
               >
               <h3>Datos de quien promueve</h3>
-              <p>Captura únicamente la información que aparece en los formularios de este escrito.</p>
+              <p>
+                Captura únicamente la información que aparece en los formularios de este escrito.
+              </p>
             </div>
             <span class="required-info"> <span aria-hidden="true">*</span> Campos señalados </span>
           </div>
@@ -232,6 +234,43 @@
                 (change)="validarCondicionSeparacion()"
               />
             </div>
+
+            @if (tipoDocumento() === 'divorcio') {
+              <div class="form-group">
+                <label for="ingresosPromovente">Ingresos aproximados mensuales</label>
+                <input
+                  type="number"
+                  id="ingresosPromovente"
+                  min="0"
+                  formControlName="ingresosMensuales"
+                />
+              </div>
+            }
+
+            @if (
+              tipoDocumento() === 'pension' &&
+              formularioDatosPension.controls.modalidadLaboral.value === 'con-relacion-laboral'
+            ) {
+              <div class="form-group">
+                <label for="clabeInterbancaria">CLABE interbancaria</label>
+                <input
+                  type="text"
+                  id="clabeInterbancaria"
+                  inputmode="numeric"
+                  maxlength="18"
+                  formControlName="clabeInterbancaria"
+                />
+              </div>
+              <div class="form-group">
+                <label for="bancoDemandante">Banco</label>
+                <input
+                  type="text"
+                  id="bancoDemandante"
+                  placeholder="Nombre del banco"
+                  formControlName="banco"
+                />
+              </div>
+            }
           </form>
           <div class="form-actions">
             <span class="progress-text">Paso {{ pasoActual }} <span>de 5</span></span>
@@ -321,6 +360,44 @@
               />
             </div>
 
+            @if (tipoDocumento() === 'pension') {
+              <div class="form-group">
+                <label for="lugarNacimientoDemandado">Lugar de nacimiento</label>
+                <input
+                  type="text"
+                  id="lugarNacimientoDemandado"
+                  formControlName="lugarNacimiento"
+                />
+              </div>
+              <div class="form-group">
+                <label for="fechaNacimientoDemandado">Fecha de nacimiento</label>
+                <input
+                  type="date"
+                  id="fechaNacimientoDemandado"
+                  formControlName="fechaNacimiento"
+                />
+              </div>
+              <div class="form-group">
+                <label for="curpDemandado">CURP</label>
+                <input type="text" id="curpDemandado" autocomplete="off" formControlName="curp" />
+                @if (
+                  formularioDatosPension.controls.modalidadLaboral.value === 'sin-relacion-laboral'
+                ) {
+                  <small class="field-hint"
+                    >Dato relevante para la modalidad sin relación laboral.</small
+                  >
+                }
+              </div>
+              <div class="form-group">
+                <label for="nssDemandado">NSS</label>
+                <input type="text" id="nssDemandado" autocomplete="off" formControlName="nss" />
+              </div>
+              <div class="form-group">
+                <label for="rfcDemandado">RFC</label>
+                <input type="text" id="rfcDemandado" autocomplete="off" formControlName="rfc" />
+              </div>
+            }
+
             @if (
               tipoDocumento() === 'pension' &&
               formularioDatosPension.controls.modalidadLaboral.value === 'con-relacion-laboral'
@@ -346,15 +423,15 @@
             }
 
             <!-- Ingresos mensuales -->
-            @if (tipoDocumento() === 'pension') {
+            @if (tipoDocumento() === 'pension' || tipoDocumento() === 'divorcio') {
               <div class="form-group">
-              <label for="ingresoMensual">Ingresos estimados mensuales del demandado</label>
-              <input
-                type="number"
-                id="ingresoMensual"
-                min="0"
-                formControlName="ingresosMensuales"
-              />
+                <label for="ingresoMensual">Ingresos estimados mensuales del demandado</label>
+                <input
+                  type="number"
+                  id="ingresoMensual"
+                  min="0"
+                  formControlName="ingresosMensuales"
+                />
               </div>
             }
           </form>
@@ -438,6 +515,21 @@
                     placeholder="Infante, Primaria, Secundaria..."
                     formControlName="escolaridad"
                   />
+                </div>
+
+                <div class="form-group">
+                  <label [for]="'generoGramatical-' + i">
+                    Concordancia gramatical en el escrito
+                  </label>
+                  <select [id]="'generoGramatical-' + i" formControlName="generoGramatical">
+                    <option value="">Sin especificar</option>
+                    <option value="femenino">Femenino (hija)</option>
+                    <option value="masculino">Masculino (hijo)</option>
+                  </select>
+                  <small class="field-hint">
+                    Solo se utiliza para concordar referencias como «mi menor hija» o «mis hijos
+                    menores».
+                  </small>
                 </div>
 
                 <details class="child-record-details">

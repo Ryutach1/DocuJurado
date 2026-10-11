@@ -13,6 +13,9 @@ const caso: Caso = {
     escolaridad: 'Preparatoria',
     telefono: '8000000000',
     direccion: 'Calle de prueba 123',
+    ingresosMensuales: 15000,
+    clabeInterbancaria: '012345678901234567',
+    banco: 'Banco de prueba',
   },
   demandado: {
     nombre: 'Luis Ejemplo',
@@ -20,6 +23,11 @@ const caso: Caso = {
     ocupacion: 'Empleado',
     escolaridad: 'Universidad',
     direccion: 'Avenida ficticia 456',
+    lugarNacimiento: 'Ciudad de prueba',
+    fechaNacimiento: '1990-01-01',
+    curp: 'CURP-DE-PRUEBA',
+    nss: 'NSS-DE-PRUEBA',
+    rfc: 'RFC-DE-PRUEBA',
     nombreEmpresa: 'Empresa de prueba',
     domicilioEmpresa: 'Domicilio de prueba',
     ingresosMensuales: 20000,
@@ -29,6 +37,7 @@ const caso: Caso = {
       nombre: 'Alex Ejemplo',
       edad: 8,
       escolaridad: 'Primaria',
+      generoGramatical: 'femenino',
       identificadorElectronicoNacimiento: 'ID-ELECTRONICO-1',
     },
     { nombre: 'Sam Ejemplo', edad: 5, escolaridad: 'Preescolar' },
@@ -161,6 +170,64 @@ describe('DocumentGeneratorService', () => {
     const generatedXml = new PizZip(await result.arrayBuffer()).file('word/document.xml')?.asText();
 
     expect(generatedXml).toContain('Alex Ejemplo y Sam Ejemplo|2');
+  });
+
+  it('builds grammatically matching child references from count and indicated grammatical gender', async () => {
+    const template = createTemplateFile(
+      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{hijos.referencia}}</w:t></w:r></w:p><w:sectPr/></w:body></w:document>',
+    );
+    const result = await service.generateDocument(template, caso);
+    const generatedXml = new PizZip(await result.arrayBuffer()).file('word/document.xml')?.asText();
+
+    expect(generatedXml).toContain('mis hijas e hijos menores');
+  });
+
+  it('uses a singular child reference when one child is captured', async () => {
+    const template = createTemplateFile(
+      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{hijos.referencia}}</w:t></w:r></w:p><w:sectPr/></w:body></w:document>',
+    );
+    const casoIndividual = { ...caso, hijos: [{ ...caso.hijos[0] }] };
+    const result = await service.generateDocument(template, casoIndividual);
+    const generatedXml = new PizZip(await result.arrayBuffer()).file('word/document.xml')?.asText();
+
+    expect(generatedXml).toContain('mi menor hija');
+  });
+
+  it('maps identity, birth, bank and applicant income fields', async () => {
+    const template = createTemplateFile(
+      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{demandado.curp}}|{{demandado.nss}}|{{demandado.rfc}}|{{demandado.lugarNacimiento}}|{{demandado.fechaNacimiento}}|{{demandante.clabeInterbancaria}}|{{demandante.banco}}|{{demandante.ingresosMensuales}}</w:t></w:r></w:p><w:sectPr/></w:body></w:document>',
+    );
+    const result = await service.generateDocument(template, caso);
+    const generatedXml = new PizZip(await result.arrayBuffer()).file('word/document.xml')?.asText();
+
+    expect(generatedXml).toContain(
+      'CURP-DE-PRUEBA|NSS-DE-PRUEBA|RFC-DE-PRUEBA|Ciudad de prueba|1/1/1990|012345678901234567|Banco de prueba|',
+    );
+  });
+
+  it('maps the applicant income only for divorce documents', async () => {
+    const template = createTemplateFile(
+      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{demandante.ingresosMensuales}}</w:t></w:r></w:p><w:sectPr/></w:body></w:document>',
+    );
+    const casoDivorcio = { ...caso, tipoDocumento: 'divorcio' as const };
+    const result = await service.generateDocument(template, casoDivorcio);
+    const generatedXml = new PizZip(await result.arrayBuffer()).file('word/document.xml')?.asText();
+
+    expect(generatedXml).toContain('15000');
+  });
+
+  it('does not carry bank or applicant income data into unrelated document variants', async () => {
+    const template = createTemplateFile(
+      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{demandante.clabeInterbancaria}}|{{demandante.banco}}|{{demandante.ingresosMensuales}}</w:t></w:r></w:p><w:sectPr/></w:body></w:document>',
+    );
+    const casoSinRelacion = {
+      ...caso,
+      datosPension: { ...caso.datosPension, modalidadLaboral: 'sin-relacion-laboral' as const },
+    };
+    const result = await service.generateDocument(template, casoSinRelacion);
+    const generatedXml = new PizZip(await result.arrayBuffer()).file('word/document.xml')?.asText();
+
+    expect(generatedXml).toContain('||');
   });
 
   it('replaces every populated field from the provided pension and divorce questionnaires', async () => {

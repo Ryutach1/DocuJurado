@@ -13,4 +13,9 @@ export interface Demandante {
 
   direccion: string;
 
+  ingresosMensuales?: number;
+
+  clabeInterbancaria?: string;
+
+  banco?: string;
 }

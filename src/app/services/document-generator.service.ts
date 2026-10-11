@@ -52,6 +52,10 @@ function formatTemplateDate(value: Date | string | null | undefined): string {
 }
 
 function buildTemplateData(caso: Caso) {
+  const esPension = caso.tipoDocumento === 'pension';
+  const pensionConRelacionLaboral =
+    esPension && caso.datosPension.modalidadLaboral === 'con-relacion-laboral';
+  const esDivorcio = caso.tipoDocumento === 'divorcio';
   const data: Record<string, unknown> = {
     numeroExpediente: caso.numeroExpediente,
     tipoDocumento: caso.tipoDocumento,
@@ -62,14 +66,27 @@ function buildTemplateData(caso: Caso) {
     'demandante.telefono': caso.demandante.telefono,
     'demandante.correo': caso.demandante.correo ?? '',
     'demandante.direccion': caso.demandante.direccion,
+    'demandante.ingresosMensuales': esDivorcio ? (caso.demandante.ingresosMensuales ?? '') : '',
+    'demandante.clabeInterbancaria': pensionConRelacionLaboral
+      ? (caso.demandante.clabeInterbancaria ?? '')
+      : '',
+    'demandante.banco': pensionConRelacionLaboral ? (caso.demandante.banco ?? '') : '',
     'demandado.nombre': caso.demandado.nombre,
     'demandado.edad': caso.demandado.edad,
     'demandado.ocupacion': caso.demandado.ocupacion,
     'demandado.escolaridad': caso.demandado.escolaridad,
     'demandado.direccion': caso.demandado.direccion,
-    'demandado.nombreEmpresa': caso.demandado.nombreEmpresa,
-    'demandado.domicilioEmpresa': caso.demandado.domicilioEmpresa,
-    'demandado.ingresosMensuales': caso.demandado.ingresosMensuales ?? 0,
+    'demandado.lugarNacimiento': esPension ? (caso.demandado.lugarNacimiento ?? '') : '',
+    'demandado.fechaNacimiento': esPension
+      ? formatTemplateDate(caso.demandado.fechaNacimiento)
+      : '',
+    'demandado.curp': esPension ? (caso.demandado.curp ?? '') : '',
+    'demandado.nss': esPension ? (caso.demandado.nss ?? '') : '',
+    'demandado.rfc': esPension ? (caso.demandado.rfc ?? '') : '',
+    'demandado.nombreEmpresa': pensionConRelacionLaboral ? caso.demandado.nombreEmpresa : '',
+    'demandado.domicilioEmpresa': pensionConRelacionLaboral ? caso.demandado.domicilioEmpresa : '',
+    'demandado.ingresosMensuales':
+      esPension || esDivorcio ? (caso.demandado.ingresosMensuales ?? '') : '',
     hijos: caso.hijos.map((hijo) => ({ ...hijo })),
     'abogado.nombre': caso.abogado.nombre,
     'abogado.cedulaProfesional': caso.abogado.cedulaProfesional,
@@ -86,10 +103,32 @@ function buildTemplateData(caso: Caso) {
       : `${nombresHijos.slice(0, -1).join(', ')} y ${nombresHijos[nombresHijos.length - 1]}`;
   data['hijos.cantidad'] = nombresHijos.length;
 
+  const hijosConGenero = caso.hijos.filter((hijo) => hijo.nombre.trim().length > 0);
+  const generos = hijosConGenero.map((hijo) => hijo.generoGramatical);
+  const sonTodasHijas = generos.every((genero) => genero === 'femenino');
+  const sonTodosHijos = generos.every((genero) => genero === 'masculino');
+  if (hijosConGenero.length === 1) {
+    data['hijos.referencia'] =
+      generos[0] === 'femenino'
+        ? 'mi menor hija'
+        : generos[0] === 'masculino'
+          ? 'mi menor hijo'
+          : 'mi hija o hijo menor';
+  } else if (hijosConGenero.length > 1) {
+    data['hijos.referencia'] = sonTodasHijas
+      ? 'mis hijas menores'
+      : sonTodosHijos
+        ? 'mis hijos menores'
+        : 'mis hijas e hijos menores';
+  } else {
+    data['hijos.referencia'] = '';
+  }
+
   for (const [index, hijo] of caso.hijos.entries()) {
     data[`hijos.${index}.nombre`] = hijo.nombre;
     data[`hijos.${index}.edad`] = hijo.edad;
     data[`hijos.${index}.escolaridad`] = hijo.escolaridad;
+    data[`hijos.${index}.generoGramatical`] = hijo.generoGramatical ?? '';
     data[`hijos.${index}.identificadorElectronicoNacimiento`] =
       hijo.identificadorElectronicoNacimiento ?? '';
   }
