@@ -1,14 +1,14 @@
-# Variables para plantillas DOCX
+# Delimitación de formularios y plantillas DOCX
 
-El generador reemplaza etiquetas con llaves dobles (`{{...}}`) y descarga una copia de la
-plantilla seleccionada. Los nombres distinguen mayúsculas, minúsculas y puntos.
+DocuJurado captura datos con formularios distintos según el escrito y sustituye etiquetas
+`{{...}}` en una copia de la plantilla `.docx` que la persona selecciona. El texto jurídico fijo
+permanece en el Word de origen; la aplicación solo completa sus campos variables.
 
-## Expediente y partes
+## Datos compartidos de las partes
+
+Estos son los datos generales que la aplicación solicita en los formularios:
 
 ```text
-{{numeroExpediente}}
-{{tipoDocumento}}
-
 {{demandante.nombre}}
 {{demandante.edad}}
 {{demandante.ocupacion}}
@@ -16,123 +16,54 @@ plantilla seleccionada. Los nombres distinguen mayúsculas, minúsculas y puntos
 {{demandante.telefono}}
 {{demandante.correo}}
 {{demandante.direccion}}
-{{demandante.nacionalidad}}
-{{demandante.estadoCivil}}
-{{demandante.fechaNacimiento}}
-{{demandante.CURP}}
-{{demandante.RFC}}
 
 {{demandado.nombre}}
 {{demandado.edad}}
 {{demandado.ocupacion}}
 {{demandado.escolaridad}}
-{{demandado.fechaNacimiento}}
-{{demandado.CURP}}
-{{demandado.NSS}}
-{{demandado.RFC}}
 {{demandado.direccion}}
-{{demandado.nombreEmpresa}}
-{{demandado.domicilioEmpresa}}
 {{demandado.ingresosMensuales}}
-{{demandado.nacionalidad}}
-{{demandado.estadoCivil}}
 
-{{abogado.nombre}}
-{{abogado.cedulaProfesional}}
-```
-
-## Hijas e hijos
-
-Los índices comienzan en cero. Los datos del acta de nacimiento son opcionales:
-
-```text
 {{hijos.0.nombre}}
 {{hijos.0.edad}}
 {{hijos.0.escolaridad}}
-{{hijos.0.fechaNacimiento}}
-{{hijos.0.lugarNacimiento}}
-{{hijos.0.registroCivil.numeroActa}}
-{{hijos.0.registroCivil.libro}}
-{{hijos.0.registroCivil.foja}}
-{{hijos.0.registroCivil.oficialia}}
-{{hijos.0.registroCivil.municipio}}
-{{hijos.0.registroCivil.estado}}
-{{hijos.0.registroCivil.fechaRegistro}}
+{{hijos.0.identificadorElectronicoNacimiento}}
 {{hijos.nombres}}
 {{hijos.cantidad}}
+{{numeroExpediente}}
+{{abogado.fechaRecepcionPapeleria}}
+{{abogado.nombreReceptora}}
 ```
 
-Para una cantidad variable de hijos se puede usar un bloque de repetición:
+Los datos que no se solicitan en estos formularios —por ejemplo, fecha de nacimiento de los hijos,
+CURP/RFC de la promovente, o ingreso de la promovente— no forman parte de las etiquetas admitidas
+para estas plantillas.
+
+`hijos.0` representa a la primera hija o hijo; el índice comienza en cero. Para mostrar nombres y
+cantidades variables, se puede usar `{{hijos.nombres}}` y `{{hijos.cantidad}}`. También se admite un
+bloque de repetición:
 
 ```text
 {{#hijos}}
-{{nombre}} — {{edad}} años — {{escolaridad}}
+{{nombre}} — {{edad}} años — {{escolaridad}} — {{identificadorElectronicoNacimiento}}
 {{/hijos}}
 ```
 
-Dentro del bloque, los nombres son relativos a cada hijo. Para evitar que las etiquetas de un
-índice que no existe detengan la generación, el generador las deja vacías.
+El identificador electrónico del acta de nacimiento es el único dato de esa acta que se captura
+para el cuerpo probatorio de las plantillas de pensión. Oficialía, libro, número de acta y municipio
+no se piden para cada hija o hijo ni deben etiquetarse en esas demandas.
 
-## Matrimonio y registro civil
+## Pensión alimenticia con relación laboral
 
-```text
-{{datosMatrimonio.fechaCelebracion}}
-{{datosMatrimonio.lugarCelebracion}}
-{{datosMatrimonio.regimenPatrimonial}}
-{{datosMatrimonio.domicilioConyugal}}
-{{datosMatrimonio.fechaSeparacion}}
-{{datosMatrimonio.registro.numeroActa}}
-{{datosMatrimonio.registro.libro}}
-{{datosMatrimonio.registro.foja}}
-{{datosMatrimonio.registro.oficialia}}
-{{datosMatrimonio.registro.municipio}}
-{{datosMatrimonio.registro.estado}}
-{{datosMatrimonio.registro.fechaRegistro}}
-```
-
-## Datos específicos del documento
-
-Pensión alimenticia:
+Usa una plantilla propia que contemple empleo, empresa y gastos:
 
 ```text
-{{datosPension.modalidadLaboral}}
+{{demandado.nombreEmpresa}}
+{{demandado.domicilioEmpresa}}
 {{datosPension.porcentajeSolicitado}}
 {{datosPension.montoSolicitado}}
 {{datosPension.situacionLaboralDemandado}}
-{{datosPension.observaciones}}
-```
 
-Divorcio:
-
-```text
-{{datosDivorcio.domicilioConyugal}}
-{{datosDivorcio.fechaSeparacion}}
-{{datosDivorcio.duracionSeparacion}}
-{{datosDivorcio.propuestaGuardaCustodia}}
-{{datosDivorcio.propuestaConvivencia}}
-{{datosDivorcio.propuestaPension}}
-{{datosDivorcio.bienesComunes}}
-{{datosDivorcio.solicitarSeparacionProvisional}}
-{{datosDivorcio.observaciones}}
-```
-
-Separación provisional:
-
-```text
-{{datosSeparacion.domicilioConyugal}}
-{{datosSeparacion.domicilioPropuestoDemandante}}
-{{datosSeparacion.domicilioPropuestoDemandado}}
-{{datosSeparacion.fechaSeparacion}}
-{{datosSeparacion.propuestaGuardaCustodia}}
-{{datosSeparacion.propuestaConvivencia}}
-{{datosSeparacion.propuestaPension}}
-{{datosSeparacion.medidasSolicitadas}}
-{{datosSeparacion.observaciones}}
-```
-
-Gastos de manutención:
-
-```text
 {{gastos.habitacion.monto}}
 {{gastos.habitacion.periodicidad}}
 {{gastos.higiene.monto}}
@@ -147,22 +78,77 @@ Gastos de manutención:
 {{gastos.salud.periodicidad}}
 ```
 
-## Uso y privacidad
+Esta es la única variante de pensión que solicita y muestra el desglose de gastos en la interfaz.
 
-1. Elige la pestaña del documento que vas a preparar.
-2. Selecciona en esa pestaña su archivo `.docx`; las plantillas quedan asociadas por documento
-   mientras la aplicación permanece abierta.
-3. Completa el formulario y avanza a la revisión para generar la copia.
-4. Cambia a otra pestaña para preparar otro documento del mismo expediente. La separación
-   provisional es opcional.
+## Pensión alimenticia sin relación laboral
 
-La variante laboral de Pensión se selecciona dentro de sus datos específicos. La separación y el
-divorcio pueden compartir las partes e hijos del expediente, pero tienen datos y plantillas propias.
-Los datos bancarios escritos entre corchetes en las plantillas se conservan como marcadores
-manuales: no se capturan ni guardan en el modelo.
+Usa una plantilla diferente. No debe incluir datos de empresa ni la planilla de gastos:
 
-Los campos opcionales vacíos se sustituyen por texto vacío. Las fechas se presentan con el formato
-local del navegador; los saltos de línea se conservan. Una etiqueta desconocida produce un error
-visible en lugar de descargar un documento incompleto. La plantilla y los datos se procesan en el
-navegador y no se envían al servidor. Usa datos ficticios o anonimizados al probar y revisa el
-documento generado antes de utilizarlo.
+```text
+{{datosPension.situacionLaboralDemandado}}
+{{datosPension.porcentajeSolicitado}}
+{{datosPension.montoSolicitado}}
+```
+
+Los campos compartidos de promovente, demandado e hijos siguen disponibles para esta variante.
+
+## Divorcio incausado
+
+El formulario de divorcio añade los datos del vínculo matrimonial. El régimen patrimonial se
+conserva como antecedente del caso, pero no se captura ni se inserta en el texto de la plantilla.
+Para la copia del acta de matrimonio se pueden usar estos campos:
+
+```text
+{{datosMatrimonio.fechaCelebracion}}
+{{datosMatrimonio.lugarCelebracion}}
+{{datosMatrimonio.domicilioConyugal}}
+{{datosMatrimonio.fechaSeparacion}}
+{{datosMatrimonio.registro.numeroActa}}
+{{datosMatrimonio.registro.libro}}
+{{datosMatrimonio.registro.oficialia}}
+{{datosMatrimonio.registro.municipio}}
+
+{{datosDivorcio.domicilioConyugal}}
+{{datosDivorcio.fechaSeparacion}}
+{{datosDivorcio.duracionSeparacion}}
+{{datosDivorcio.hijasHijosVivenCon}}
+{{datosDivorcio.embarazoDemandado}}
+{{datosDivorcio.dedicacionHogarCuidado}}
+{{datosDivorcio.propuestaGuardaCustodia}}
+{{datosDivorcio.propuestaConvivencia}}
+{{datosDivorcio.propuestaPension}}
+{{datosDivorcio.bienesComunes}}
+{{datosDivorcio.observaciones}}
+```
+
+De la información del acta matrimonial se capturan número de acta, libro, oficialía y municipio.
+No se solicita identificador electrónico para el acta de matrimonio.
+
+## Separación provisional
+
+Es un escrito adicional y opcional, no un requisito para generar el divorcio. Solo se habilita si
+el domicilio de la parte promovente y el de la parte demandada coinciden. La comparación ignora
+mayúsculas, acentos, espacios repetidos y puntuación común.
+
+```text
+{{datosSeparacion.domicilioConyugal}}
+{{datosSeparacion.domicilioPropuestoDemandante}}
+{{datosSeparacion.domicilioPropuestoDemandado}}
+{{datosSeparacion.fechaSeparacion}}
+{{datosSeparacion.propuestaGuardaCustodia}}
+{{datosSeparacion.propuestaConvivencia}}
+{{datosSeparacion.propuestaPension}}
+{{datosSeparacion.medidasSolicitadas}}
+{{datosSeparacion.observaciones}}
+```
+
+## Notas para preparar una plantilla
+
+- Cada etiqueta se escribe exactamente, incluyendo mayúsculas, puntos y llaves dobles.
+- Mantén el texto fijo y reemplaza únicamente el dato variable por su etiqueta.
+- Crea y selecciona una plantilla distinta para pensión con empleo, pensión sin empleo, divorcio y,
+  cuando aplique, separación provisional.
+- Deja los datos bancarios entre corchetes para completar manualmente. No se capturan en la app.
+- Los campos opcionales vacíos se sustituyen por texto vacío. Una etiqueta desconocida produce un
+  error visible para evitar descargar un documento con reemplazos pendientes.
+- La generación trabaja localmente en el navegador. Revisa el Word resultante antes de usarlo.

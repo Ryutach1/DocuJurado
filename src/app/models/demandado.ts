@@ -7,14 +7,6 @@ export interface Demandado {
 
   escolaridad: string;
 
-  fechaNacimiento: Date;
-
-  CURP: string;
-
-  NSS?: string;
-
-  RFC?: string;
-
   direccion: string;
 
   nombreEmpresa: string;
@@ -23,7 +15,4 @@ export interface Demandado {
 
   ingresosMensuales?: number;
 
-  nacionalidad?: string;
-
-  estadoCivil?: string;
 }

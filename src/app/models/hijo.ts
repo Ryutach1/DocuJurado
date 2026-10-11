@@ -1,5 +1,3 @@
-import { DatosRegistroCivil } from './datos-registro-civil';
-
 export interface Hijo {
   nombre: string;
 
@@ -7,9 +5,5 @@ export interface Hijo {
 
   escolaridad: string;
 
-  fechaNacimiento?: string;
-
-  lugarNacimiento?: string;
-
-  registroCivil?: DatosRegistroCivil;
+  identificadorElectronicoNacimiento?: string;
 }

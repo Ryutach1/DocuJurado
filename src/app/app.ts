@@ -6,6 +6,7 @@ import { Demandante, Demandado, Hijo, Gastos } from './models';
 import { RevisionCaso } from './components/revision-caso/revision-caso';
 import { MusicPlayer } from './components/music-player/music-player';
 import { TipoDocumento } from './models/tipo-documento';
+import { Abogado } from './models/abogado';
 
 @Component({
   selector: 'app-root',
@@ -17,18 +18,45 @@ import { TipoDocumento } from './models/tipo-documento';
 export class App {
   private casoService = inject(CasoService);
   readonly templateFile = signal<File | null>(null);
-  readonly plantillasPorTipo = signal<Record<TipoDocumento, File | null>>({
+  readonly plantillasPorTipo = signal<
+    Record<TipoDocumento | 'pension-con-relacion-laboral' | 'pension-sin-relacion-laboral', File | null>
+  >({
     pension: null,
+    'pension-con-relacion-laboral': null,
+    'pension-sin-relacion-laboral': null,
     divorcio: null,
     separacion: null,
   });
   readonly tipoDocumento = signal<TipoDocumento>('pension');
   readonly nombrePlantillaActual = computed(() => this.templateFile()?.name ?? null);
-  readonly tiposDocumento: { id: TipoDocumento; nombre: string; detalle: string }[] = [
+  private readonly documentosDisponibles: { id: TipoDocumento; nombre: string; detalle: string }[] = [
     { id: 'pension', nombre: 'Pensión alimenticia', detalle: 'Con o sin relación laboral' },
     { id: 'divorcio', nombre: 'Divorcio', detalle: 'Documento principal' },
     { id: 'separacion', nombre: 'Separación provisional', detalle: 'Documento opcional' },
   ];
+  get tiposDocumento(): { id: TipoDocumento; nombre: string; detalle: string }[] {
+    return this.documentosDisponibles.filter(
+      (documento) =>
+        documento.id !== 'separacion' ||
+        (this.formularioDatosDivorcio.controls.solicitarSeparacionProvisional.value &&
+          this.domiciliosCoinciden),
+    );
+  }
+
+  get domiciliosCoinciden(): boolean {
+    const normalizar = (domicilio: string) =>
+      domicilio
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[.,#]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    const domicilioPromovente = normalizar(this.formularioDemandante.controls.direccion.value);
+    const domicilioDemandado = normalizar(this.formularioDemandado.controls.direccion.value);
+
+    return Boolean(domicilioPromovente) && domicilioPromovente === domicilioDemandado;
+  }
 
   pasoActual = 1;
   ngOnInit(): void {
@@ -49,16 +77,6 @@ export class App {
     correo: new FormControl('', { nonNullable: true }),
 
     direccion: new FormControl('', { nonNullable: true }),
-
-    nacionalidad: new FormControl('', { nonNullable: true }),
-
-    estadoCivil: new FormControl('', { nonNullable: true }),
-
-    fechaNacimiento: new FormControl('', { nonNullable: true }),
-
-    CURP: new FormControl('', { nonNullable: true }),
-
-    RFC: new FormControl('', { nonNullable: true }),
   });
 
   formularioDemandado = new FormGroup({
@@ -70,14 +88,6 @@ export class App {
 
     escolaridad: new FormControl('', { nonNullable: true }),
 
-    fechaNacimiento: new FormControl(new Date(), { nonNullable: true }),
-
-    CURP: new FormControl('', { nonNullable: true }),
-
-    NSS: new FormControl('', { nonNullable: true }),
-
-    RFC: new FormControl('', { nonNullable: true }),
-
     direccion: new FormControl('', { nonNullable: true }),
 
     nombreEmpresa: new FormControl('', { nonNullable: true }),
@@ -86,9 +96,6 @@ export class App {
 
     ingresosMensuales: new FormControl(0, { nonNullable: true }),
 
-    nacionalidad: new FormControl('', { nonNullable: true }),
-
-    estadoCivil: new FormControl('', { nonNullable: true }),
   });
 
   formularioHijos = new FormArray<
@@ -96,17 +103,7 @@ export class App {
       nombre: FormControl<string>;
       edad: FormControl<number>;
       escolaridad: FormControl<string>;
-      fechaNacimiento: FormControl<string>;
-      lugarNacimiento: FormControl<string>;
-      registroCivil: FormGroup<{
-        numeroActa: FormControl<string>;
-        libro: FormControl<string>;
-        foja: FormControl<string>;
-        oficialia: FormControl<string>;
-        municipio: FormControl<string>;
-        estado: FormControl<string>;
-        fechaRegistro: FormControl<string>;
-      }>;
+      identificadorElectronicoNacimiento: FormControl<string>;
     }>
   >([]);
 
@@ -135,6 +132,17 @@ export class App {
     return this.tiposDocumento.find((tipo) => tipo.id === this.tipoDocumento())?.nombre ?? '';
   }
 
+  get etiquetaPlantillaActual(): string {
+    if (this.tipoDocumento() !== 'pension') {
+      return this.tipoDocumentoNombre;
+    }
+
+    const modalidad = this.formularioDatosPension.controls.modalidadLaboral.value;
+    return modalidad === 'con-relacion-laboral'
+      ? 'Pensión alimenticia · con relación laboral'
+      : 'Pensión alimenticia · sin relación laboral';
+  }
+
   agregarHijo(): void {
     this.formularioHijos.push(
       new FormGroup({
@@ -144,19 +152,7 @@ export class App {
 
         escolaridad: new FormControl('', { nonNullable: true }),
 
-        fechaNacimiento: new FormControl('', { nonNullable: true }),
-
-        lugarNacimiento: new FormControl('', { nonNullable: true }),
-
-        registroCivil: new FormGroup({
-          numeroActa: new FormControl('', { nonNullable: true }),
-          libro: new FormControl('', { nonNullable: true }),
-          foja: new FormControl('', { nonNullable: true }),
-          oficialia: new FormControl('', { nonNullable: true }),
-          municipio: new FormControl('', { nonNullable: true }),
-          estado: new FormControl('', { nonNullable: true }),
-          fechaRegistro: new FormControl('', { nonNullable: true }),
-        }),
+        identificadorElectronicoNacimiento: new FormControl('', { nonNullable: true }),
       }),
     );
   }
@@ -200,17 +196,13 @@ export class App {
   formularioDatosMatrimonio = new FormGroup({
     fechaCelebracion: new FormControl('', { nonNullable: true }),
     lugarCelebracion: new FormControl('', { nonNullable: true }),
-    regimenPatrimonial: new FormControl('', { nonNullable: true }),
     domicilioConyugal: new FormControl('', { nonNullable: true }),
     fechaSeparacion: new FormControl('', { nonNullable: true }),
     registro: new FormGroup({
       numeroActa: new FormControl('', { nonNullable: true }),
       libro: new FormControl('', { nonNullable: true }),
-      foja: new FormControl('', { nonNullable: true }),
       oficialia: new FormControl('', { nonNullable: true }),
       municipio: new FormControl('', { nonNullable: true }),
-      estado: new FormControl('', { nonNullable: true }),
-      fechaRegistro: new FormControl('', { nonNullable: true }),
     }),
   });
 
@@ -229,6 +221,9 @@ export class App {
     domicilioConyugal: new FormControl('', { nonNullable: true }),
     fechaSeparacion: new FormControl('', { nonNullable: true }),
     duracionSeparacion: new FormControl('', { nonNullable: true }),
+    hijasHijosVivenCon: new FormControl('', { nonNullable: true }),
+    embarazoDemandado: new FormControl('', { nonNullable: true }),
+    dedicacionHogarCuidado: new FormControl('', { nonNullable: true }),
     propuestaGuardaCustodia: new FormControl('', { nonNullable: true }),
     propuestaConvivencia: new FormControl('', { nonNullable: true }),
     propuestaPension: new FormControl('', { nonNullable: true }),
@@ -247,6 +242,11 @@ export class App {
     propuestaPension: new FormControl('', { nonNullable: true }),
     medidasSolicitadas: new FormControl('', { nonNullable: true }),
     observaciones: new FormControl('', { nonNullable: true }),
+  });
+
+  formularioRecepcion = new FormGroup({
+    fechaRecepcionPapeleria: new FormControl('', { nonNullable: true }),
+    nombreReceptora: new FormControl('', { nonNullable: true }),
   });
 
   conceptosGasto = [
@@ -343,21 +343,63 @@ export class App {
     this.templateFile.set(template);
     this.plantillasPorTipo.update((plantillas) => ({
       ...plantillas,
-      [this.tipoDocumento()]: template,
+      [this.clavePlantillaActual]: template,
     }));
   }
 
   seleccionarTipoDocumento(tipo: TipoDocumento): void {
+    if (tipo === 'separacion' && !this.tiposDocumento.some((documento) => documento.id === tipo)) {
+      return;
+    }
     this.guardarDatosDocumentales();
     this.tipoDocumento.set(tipo);
     this.casoService.actualizarTipoDocumento(tipo);
-    this.templateFile.set(this.plantillasPorTipo()[tipo]);
+    this.templateFile.set(this.plantillasPorTipo()[this.clavePlantillaActual]);
+  }
+
+  actualizarPlantillaPorModalidad(): void {
+    if (this.tipoDocumento() === 'pension') {
+      this.templateFile.set(this.plantillasPorTipo()[this.clavePlantillaActual]);
+    }
+  }
+
+  validarCondicionSeparacion(): void {
+    if (this.domiciliosCoinciden) {
+      return;
+    }
+
+    this.formularioDatosDivorcio.controls.solicitarSeparacionProvisional.setValue(false);
+    if (this.tipoDocumento() === 'separacion') {
+      this.seleccionarTipoDocumento('divorcio');
+    }
+  }
+
+  private get clavePlantillaActual():
+    | TipoDocumento
+    | 'pension-con-relacion-laboral'
+    | 'pension-sin-relacion-laboral' {
+    if (this.tipoDocumento() !== 'pension') {
+      return this.tipoDocumento();
+    }
+    return this.formularioDatosPension.controls.modalidadLaboral.value === 'con-relacion-laboral'
+      ? 'pension-con-relacion-laboral'
+      : 'pension-sin-relacion-laboral';
   }
 
   private guardarDatosDocumentales(): void {
     this.casoService.actualizarDatosMatrimonio(this.formularioDatosMatrimonio.getRawValue());
     this.casoService.actualizarDatosPension(this.formularioDatosPension.getRawValue());
-    this.casoService.actualizarDatosDivorcio(this.formularioDatosDivorcio.getRawValue());
+    this.casoService.actualizarDatosDivorcio({
+      ...this.formularioDatosDivorcio.getRawValue(),
+      solicitarSeparacionProvisional:
+        this.formularioDatosDivorcio.controls.solicitarSeparacionProvisional.value &&
+        this.domiciliosCoinciden,
+    });
     this.casoService.actualizarDatosSeparacion(this.formularioDatosSeparacion.getRawValue());
+    const abogado: Abogado = {
+      ...this.casoService.obtenerAbogado(),
+      ...this.formularioRecepcion.getRawValue(),
+    };
+    this.casoService.actualizarAbogado(abogado);
   }
 }

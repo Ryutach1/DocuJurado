@@ -13,13 +13,4 @@ export interface Demandante {
 
   direccion: string;
 
-  nacionalidad?: string;
-
-  estadoCivil?: string;
-
-  fechaNacimiento?: string;
-
-  CURP?: string;
-
-  RFC?: string;
 }

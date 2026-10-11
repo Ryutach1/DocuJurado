@@ -76,7 +76,7 @@
     </div>
 
     <div class="sidebar-footer">
-      <span class="version-label">Versión 0.1.5 · En desarrollo</span>
+      <span class="version-label">Versión 0.1.8 · En desarrollo</span>
       <span>Los datos de prueba no deben ser reales.</span>
     </div>
   </aside>
@@ -99,8 +99,8 @@
           <span class="eyebrow">PREPARACIÓN GUIADA</span>
           <h3 id="welcome-title">Un caso a la vez, con claridad.</h3>
           <p>
-            Completa la información y revisa el borrador antes de generar una copia DOCX de tu
-            plantilla. El procesamiento ocurre en este navegador.
+            Elige el tipo de escrito: cada formulario pide solo los datos de esa modalidad. La
+            plantilla y la generación se procesan en este navegador.
           </p>
         </div>
         <div class="welcome-aside">
@@ -111,14 +111,18 @@
           @if (tipoDocumento() === 'pension') {
             <div [formGroup]="formularioDatosPension" class="form-group employment-mode">
               <label for="modalidadLaboral">Modalidad de pensión</label>
-              <select id="modalidadLaboral" formControlName="modalidadLaboral">
+              <select
+                id="modalidadLaboral"
+                formControlName="modalidadLaboral"
+                (change)="actualizarPlantillaPorModalidad()"
+              >
                 <option value="con-relacion-laboral">Con relación laboral</option>
                 <option value="sin-relacion-laboral">Sin relación laboral</option>
               </select>
             </div>
           }
           <app-document-loader
-            [documentLabel]="'Plantilla Word · ' + tipoDocumentoNombre"
+            [documentLabel]="'Plantilla Word · ' + etiquetaPlantillaActual"
             [selectedFileName]="nombrePlantillaActual()"
             (templateSelected)="onTemplateSelected($event)"
           ></app-document-loader>
@@ -133,7 +137,7 @@
                 >SECCIÓN 01 <span aria-hidden="true">·</span> PERSONA PROMOVENTE</span
               >
               <h3>Datos de quien promueve</h3>
-              <p>Información de contacto y datos generales de la parte actora.</p>
+              <p>Captura únicamente la información que aparece en los formularios de este escrito.</p>
             </div>
             <span class="required-info"> <span aria-hidden="true">*</span> Campos señalados </span>
           </div>
@@ -225,27 +229,8 @@
                 id="direccion"
                 placeholder="Ingresa la dirección completa"
                 formControlName="direccion"
+                (change)="validarCondicionSeparacion()"
               />
-            </div>
-            <div class="form-group">
-              <label for="nacionalidadDemandante">Nacionalidad</label>
-              <input type="text" id="nacionalidadDemandante" formControlName="nacionalidad" />
-            </div>
-            <div class="form-group">
-              <label for="estadoCivilDemandante">Estado civil</label>
-              <input type="text" id="estadoCivilDemandante" formControlName="estadoCivil" />
-            </div>
-            <div class="form-group">
-              <label for="fechaNacimientoDemandante">Fecha de nacimiento</label>
-              <input type="date" id="fechaNacimientoDemandante" formControlName="fechaNacimiento" />
-            </div>
-            <div class="form-group">
-              <label for="curpDemandante">CURP</label>
-              <input type="text" id="curpDemandante" formControlName="CURP" />
-            </div>
-            <div class="form-group">
-              <label for="rfcDemandante">RFC</label>
-              <input type="text" id="rfcDemandante" formControlName="RFC" />
             </div>
           </form>
           <div class="form-actions">
@@ -265,7 +250,7 @@
                 >SECCIÓN 02 <span aria-hidden="true">·</span> PARTE DEMANDADA</span
               >
               <h3>Datos de la parte demandada</h3>
-              <p>Datos de identificación, domicilio y actividad laboral.</p>
+              <p>Los datos laborales de empresa solo se solicitan para la variante con empleo.</p>
             </div>
             <span class="required-info"> <span aria-hidden="true">*</span> Campos señalados </span>
           </div>
@@ -321,36 +306,6 @@
               />
             </div>
 
-            <!-- fecha de nacimiento -->
-            <div class="form-group">
-              <label for="fechaNacimiento">
-                Fecha de nacimiento
-                <span>*</span>
-              </label>
-              <input type="date" id="fechaNacimiento" formControlName="fechaNacimiento" />
-            </div>
-
-            <!-- CURP -->
-            <div class="form-group">
-              <label for="curp">
-                CURP
-                <span>*</span>
-              </label>
-              <input type="text" id="curp" placeholder="Ingresa la CURP" formControlName="CURP" />
-            </div>
-
-            <!-- nss -->
-            <div class="form-group">
-              <label for="nss"> NSS </label>
-              <input type="text" id="nss" placeholder="Ingresa el NSS" formControlName="NSS" />
-            </div>
-
-            <!-- RFC -->
-            <div class="form-group">
-              <label for="rfc"> RFC </label>
-              <input type="text" id="rfc" placeholder="Ingresa el RFC" formControlName="RFC" />
-            </div>
-
             <!-- Dirección -->
             <div class="form-group form-group-full">
               <label for="direccion">
@@ -362,12 +317,12 @@
                 id="direccion"
                 placeholder="Ingresa la dirección completa"
                 formControlName="direccion"
+                (change)="validarCondicionSeparacion()"
               />
             </div>
 
-            <!-- CURP -->
             @if (
-              tipoDocumento() !== 'pension' ||
+              tipoDocumento() === 'pension' &&
               formularioDatosPension.controls.modalidadLaboral.value === 'con-relacion-laboral'
             ) {
               <div class="form-group">
@@ -391,26 +346,17 @@
             }
 
             <!-- Ingresos mensuales -->
-            <div class="form-group">
-              <label for="ingresoMensual">
-                Ingresos estimados mensuales
-                <span></span>
-              </label>
+            @if (tipoDocumento() === 'pension') {
+              <div class="form-group">
+              <label for="ingresoMensual">Ingresos estimados mensuales del demandado</label>
               <input
                 type="number"
                 id="ingresoMensual"
-                placeholder=""
+                min="0"
                 formControlName="ingresosMensuales"
               />
-            </div>
-            <div class="form-group">
-              <label for="nacionalidadDemandado">Nacionalidad</label>
-              <input type="text" id="nacionalidadDemandado" formControlName="nacionalidad" />
-            </div>
-            <div class="form-group">
-              <label for="estadoCivilDemandado">Estado civil</label>
-              <input type="text" id="estadoCivilDemandado" formControlName="estadoCivil" />
-            </div>
+              </div>
+            }
           </form>
           <div class="form-actions">
             <button type="button" class="secondary-button" (click)="volver()">
@@ -494,59 +440,17 @@
                   />
                 </div>
 
-                <div class="form-group">
-                  <label [for]="'fechaNacimientoHijo-' + i">Fecha de nacimiento</label>
-                  <input
-                    type="date"
-                    [id]="'fechaNacimientoHijo-' + i"
-                    formControlName="fechaNacimiento"
-                  />
-                </div>
-
-                <div class="form-group form-group-large">
-                  <label [for]="'lugarNacimientoHijo-' + i">Lugar de nacimiento</label>
-                  <input
-                    type="text"
-                    [id]="'lugarNacimientoHijo-' + i"
-                    formControlName="lugarNacimiento"
-                  />
-                </div>
-
                 <details class="child-record-details">
-                  <summary>Datos del acta de nacimiento (opcional)</summary>
-                  <div formGroupName="registroCivil" class="nested-form-grid">
-                    <div class="form-group">
-                      <label [for]="'actaHijo-' + i">Número de acta</label>
-                      <input type="text" [id]="'actaHijo-' + i" formControlName="numeroActa" />
-                    </div>
-                    <div class="form-group">
-                      <label [for]="'libroHijo-' + i">Libro</label>
-                      <input type="text" [id]="'libroHijo-' + i" formControlName="libro" />
-                    </div>
-                    <div class="form-group">
-                      <label [for]="'fojaHijo-' + i">Foja</label>
-                      <input type="text" [id]="'fojaHijo-' + i" formControlName="foja" />
-                    </div>
-                    <div class="form-group">
-                      <label [for]="'oficialiaHijo-' + i">Oficialía</label>
-                      <input type="text" [id]="'oficialiaHijo-' + i" formControlName="oficialia" />
-                    </div>
-                    <div class="form-group">
-                      <label [for]="'municipioHijo-' + i">Municipio de registro</label>
-                      <input type="text" [id]="'municipioHijo-' + i" formControlName="municipio" />
-                    </div>
-                    <div class="form-group">
-                      <label [for]="'estadoHijo-' + i">Estado de registro</label>
-                      <input type="text" [id]="'estadoHijo-' + i" formControlName="estado" />
-                    </div>
-                    <div class="form-group">
-                      <label [for]="'fechaRegistroHijo-' + i">Fecha de registro</label>
-                      <input
-                        type="date"
-                        [id]="'fechaRegistroHijo-' + i"
-                        formControlName="fechaRegistro"
-                      />
-                    </div>
+                  <summary>Identificador del acta de nacimiento (opcional)</summary>
+                  <div class="form-group">
+                    <label [for]="'identificadorElectronicoHijo-' + i">
+                      Identificador electrónico del acta (prueba oficial)
+                    </label>
+                    <input
+                      type="text"
+                      [id]="'identificadorElectronicoHijo-' + i"
+                      formControlName="identificadorElectronicoNacimiento"
+                    />
                   </div>
                 </details>
               </div>
@@ -643,14 +547,43 @@
                 />
               </div>
               <div class="form-group">
-                <label class="checkbox-label" for="solicitarSeparacionProvisional">
-                  <input
-                    id="solicitarSeparacionProvisional"
-                    type="checkbox"
-                    formControlName="solicitarSeparacionProvisional"
-                  />
-                  ¿Preparar también la separación provisional?
+                <label for="hijasHijosVivenCon">¿Con quién viven las hijas e hijos?</label>
+                <input id="hijasHijosVivenCon" type="text" formControlName="hijasHijosVivenCon" />
+              </div>
+              <div class="form-group">
+                <label for="embarazoDemandado">¿El demandado está actualmente embarazado?</label>
+                <select id="embarazoDemandado" formControlName="embarazoDemandado">
+                  <option value="">Sin indicar</option>
+                  <option value="Sí">Sí</option>
+                  <option value="No">No</option>
+                  <option value="No aplica">No aplica</option>
+                </select>
+              </div>
+              <div class="form-group form-group-large">
+                <label for="dedicacionHogarCuidado">
+                  Dedicación al hogar y cuidado de hijas e hijos durante el matrimonio
                 </label>
+                <textarea
+                  id="dedicacionHogarCuidado"
+                  rows="3"
+                  formControlName="dedicacionHogarCuidado"
+                ></textarea>
+              </div>
+              <div class="form-group">
+                @if (domiciliosCoinciden) {
+                  <label class="checkbox-label" for="solicitarSeparacionProvisional">
+                    <input
+                      id="solicitarSeparacionProvisional"
+                      type="checkbox"
+                      formControlName="solicitarSeparacionProvisional"
+                    />
+                    Agregar escrito de separación provisional
+                  </label>
+                } @else {
+                  <p class="field-hint">
+                    La separación provisional solo se habilita cuando ambos domicilios coinciden.
+                  </p>
+                }
               </div>
               <div class="form-group form-group-large">
                 <label for="propuestaGuardaCustodia">Propuesta de guarda y custodia</label>
@@ -699,10 +632,6 @@
                 <label for="lugarCelebracion">Lugar de celebración</label>
                 <input id="lugarCelebracion" type="text" formControlName="lugarCelebracion" />
               </div>
-              <div class="form-group">
-                <label for="regimenPatrimonial">Régimen patrimonial</label>
-                <input id="regimenPatrimonial" type="text" formControlName="regimenPatrimonial" />
-              </div>
               <div class="form-group form-group-large">
                 <label for="domicilioConyugalMatrimonio">Domicilio conyugal (dato común)</label>
                 <input
@@ -721,10 +650,6 @@
                   <input id="libroMatrimonio" type="text" formControlName="libro" />
                 </div>
                 <div class="form-group">
-                  <label for="fojaMatrimonio">Foja</label>
-                  <input id="fojaMatrimonio" type="text" formControlName="foja" />
-                </div>
-                <div class="form-group">
                   <label for="oficialiaMatrimonio">Oficialía</label>
                   <input id="oficialiaMatrimonio" type="text" formControlName="oficialia" />
                 </div>
@@ -732,17 +657,25 @@
                   <label for="municipioMatrimonio">Municipio de registro</label>
                   <input id="municipioMatrimonio" type="text" formControlName="municipio" />
                 </div>
-                <div class="form-group">
-                  <label for="estadoMatrimonio">Estado de registro</label>
-                  <input id="estadoMatrimonio" type="text" formControlName="estado" />
-                </div>
-                <div class="form-group">
-                  <label for="fechaRegistroMatrimonio">Fecha de registro</label>
-                  <input id="fechaRegistroMatrimonio" type="date" formControlName="fechaRegistro" />
-                </div>
               </div>
             </form>
           }
+
+          <form [formGroup]="formularioRecepcion" class="form-grid document-fields">
+            <h4 class="form-section-title">Recepción de la papelería</h4>
+            <div class="form-group">
+              <label for="fechaRecepcionPapeleria">Fecha de recepción</label>
+              <input
+                id="fechaRecepcionPapeleria"
+                type="date"
+                formControlName="fechaRecepcionPapeleria"
+              />
+            </div>
+            <div class="form-group">
+              <label for="nombreReceptora">Abogada que recibe</label>
+              <input id="nombreReceptora" type="text" formControlName="nombreReceptora" />
+            </div>
+          </form>
 
           @if (tipoDocumento() === 'separacion') {
             <form [formGroup]="formularioDatosSeparacion" class="form-grid document-fields">
@@ -825,7 +758,10 @@
             </form>
           }
 
-          @if (tipoDocumento() === 'pension') {
+          @if (
+            tipoDocumento() === 'pension' &&
+            formularioDatosPension.controls.modalidadLaboral.value === 'con-relacion-laboral'
+          ) {
             <h4 class="form-section-title">Gastos y necesidades de manutención</h4>
             <p class="section-description">
               Indica los montos aproximados y su periodicidad para dar contexto al caso.

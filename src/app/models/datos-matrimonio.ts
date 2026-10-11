@@ -4,7 +4,6 @@ export interface DatosMatrimonio {
   registro: DatosRegistroCivil;
   fechaCelebracion: string;
   lugarCelebracion: string;
-  regimenPatrimonial: string;
   domicilioConyugal: string;
   fechaSeparacion: string;
 }

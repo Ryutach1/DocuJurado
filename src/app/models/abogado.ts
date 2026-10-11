@@ -1,7 +1,9 @@
 export interface Abogado {
+  nombre: string;
 
-    nombre: string;
+  cedulaProfesional: number;
 
-    cedulaProfesional: number;
+  fechaRecepcionPapeleria?: string;
 
+  nombreReceptora?: string;
 }

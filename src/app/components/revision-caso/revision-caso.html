@@ -5,7 +5,6 @@
       <h2>Revisión del escrito</h2>
       <p>Comprueba la información y el formato del borrador antes de continuar.</p>
     </div>
-
     <div class="revision-status">
       <span class="status-dot" aria-hidden="true"></span>
       Vista previa
@@ -66,11 +65,20 @@
           <h3 class="document-title">P R E S T A C I O N E S</h3>
           <ol class="claims">
             <li>
-              El pago de una pensión alimenticia provisional en favor de los hijos, consistente en
-              un porcentaje del salario y de las prestaciones laborales que perciba el demandado por
-              su trabajo en <span class="dynamic-value">{{ caso.demandado.nombreEmpresa }}</span
-              >, ubicado en <span class="dynamic-value">{{ caso.demandado.domicilioEmpresa }}</span
-              >.
+              @if (caso.datosPension.modalidadLaboral === 'con-relacion-laboral') {
+                El pago de una pensión alimenticia provisional en favor de los hijos, consistente en
+                un porcentaje del salario y prestaciones laborales del demandado en
+                <span class="dynamic-value">{{ caso.demandado.nombreEmpresa || 'empresa pendiente' }}</span
+                >, con domicilio en
+                <span class="dynamic-value">{{ caso.demandado.domicilioEmpresa || 'domicilio pendiente' }}</span>.
+              } @else {
+                El pago de una pensión alimenticia provisional en favor de los hijos, considerando
+                la situación laboral descrita:
+                <span class="dynamic-value">
+                  {{ caso.datosPension.situacionLaboralDemandado || 'Pendiente de describir' }}
+                </span
+                >.
+              }
             </li>
             <li>
               El pago de una pensión alimenticia definitiva en favor de los hijos, en los términos
@@ -85,7 +93,7 @@
           <h3 class="document-title">H E C H O S</h3>
           <ol class="numbered-section">
             <li>
-              La promovente y el demandado sostuvieron una relación matrimonial y establecieron su
+              La promovente y el demandado mantuvieron una relación y establecieron su
               domicilio familiar en
               <span class="dynamic-value">{{ caso.demandante.direccion }}</span
               >.
@@ -108,19 +116,29 @@
               necesidades de sus hijos, por lo que se solicita la intervención judicial para fijar
               una pensión que contribuya a su manutención.
             </li>
-            <li>
-              El demandado labora como
-              <span class="dynamic-value">{{ caso.demandado.ocupacion }}</span> en
-              <span class="dynamic-value">{{ caso.demandado.nombreEmpresa }}</span
-              >, con domicilio laboral en
-              <span class="dynamic-value">{{ caso.demandado.domicilioEmpresa }}</span
-              >.
-            </li>
-            <li>
-              Las necesidades alimentarias comprenden, entre otros conceptos, los siguientes gastos:
-            </li>
+            @if (caso.datosPension.modalidadLaboral === 'con-relacion-laboral') {
+              <li>
+                El demandado labora como
+                <span class="dynamic-value">{{ caso.demandado.ocupacion }}</span> en
+                <span class="dynamic-value">{{ caso.demandado.nombreEmpresa }}</span
+                >, con domicilio laboral en
+                <span class="dynamic-value">{{ caso.demandado.domicilioEmpresa }}</span
+                >.
+              </li>
+              <li>
+                Las necesidades alimentarias comprenden, entre otros conceptos, los siguientes gastos:
+              </li>
+            } @else {
+              <li>
+                La situación laboral del demandado se describe como:
+                <span class="dynamic-value">
+                  {{ caso.datosPension.situacionLaboralDemandado || 'Pendiente de describir' }}
+                </span>.
+              </li>
+            }
           </ol>
 
+          @if (caso.datosPension.modalidadLaboral === 'con-relacion-laboral') {
           <div class="expense-table-wrapper">
             <table class="expense-table">
               <caption>
@@ -167,6 +185,7 @@
               </tbody>
             </table>
           </div>
+          }
 
           <h3 class="document-title">D E R E C H O</h3>
           <ol class="numbered-section legal-basis">
@@ -189,6 +208,12 @@
             <li>
               <strong>Documentales públicas.</strong> Certificaciones de las actas de nacimiento de
               los hijos, para acreditar su identidad y el vínculo filial.
+              @for (hijo of caso.hijos; track $index) {
+                @if (hijo.identificadorElectronicoNacimiento) {
+                  Acta {{ $index + 1 }}: identificador electrónico
+                  <span class="dynamic-value">{{ hijo.identificadorElectronicoNacimiento }}</span>.
+                }
+              }
             </li>
             <li>
               <strong>Documentales privadas.</strong> Recibos de servicios del domicilio familiar y
@@ -217,12 +242,19 @@
               alimentos en contra de <span class="dynamic-value">{{ caso.demandado.nombre }}</span
               >.
             </li>
-            <li>
-              Fijar una pensión alimenticia provisional y girar el oficio correspondiente al centro
-              de trabajo del demandado,
-              <span class="dynamic-value">{{ caso.demandado.nombreEmpresa }}</span
-              >, para los efectos legales conducentes.
-            </li>
+            @if (caso.datosPension.modalidadLaboral === 'con-relacion-laboral') {
+              <li>
+                Fijar una pensión alimenticia provisional y girar el oficio correspondiente al centro
+                de trabajo del demandado,
+                <span class="dynamic-value">{{ caso.demandado.nombreEmpresa }}</span
+                >, para los efectos legales conducentes.
+              </li>
+            } @else {
+              <li>
+                Fijar una pensión alimenticia provisional atendiendo a la situación laboral declarada
+                por las partes.
+              </li>
+            }
             <li>
               Desahogar las etapas procesales conforme a derecho y, en su oportunidad, dictar
               sentencia favorable, estableciendo una pensión alimenticia definitiva.
@@ -243,7 +275,6 @@
           <div class="annexes">
             <h3 class="document-title">A N E X O S</h3>
             <ul>
-              <li>Acta de matrimonio.</li>
               <li>Actas de nacimiento de los hijos.</li>
               <li>Identificación oficial de la promovente.</li>
               <li>Comprobantes de servicios del domicilio.</li>
@@ -303,8 +334,12 @@
               {{ caso.datosDivorcio.duracionSeparacion || 'Pendiente de capturar' }}
             </p>
             <p>
-              Régimen patrimonial:
-              {{ caso.datosMatrimonio.regimenPatrimonial || 'Pendiente de capturar' }}
+            <p>
+              Acta matrimonial:
+              {{ caso.datosMatrimonio.registro.numeroActa || 'Número pendiente' }},
+              libro {{ caso.datosMatrimonio.registro.libro || 'pendiente' }},
+              oficialía {{ caso.datosMatrimonio.registro.oficialia || 'pendiente' }},
+              municipio {{ caso.datosMatrimonio.registro.municipio || 'pendiente' }}.
             </p>
             <p>
               Propuesta de custodia:
