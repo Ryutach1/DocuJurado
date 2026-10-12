@@ -1,21 +1,9 @@
-export interface Demandante {
-  nombre: string;
+import { PersonaBase } from './persona-base';
 
-  edad: number;
-
-  ocupacion: string;
-
-  escolaridad: string;
-
+export interface Demandante extends PersonaBase {
   telefono: string;
-
   correo?: string;
-
-  direccion: string;
-
   ingresosMensuales?: number;
-
   clabeInterbancaria?: string;
-
   banco?: string;
 }

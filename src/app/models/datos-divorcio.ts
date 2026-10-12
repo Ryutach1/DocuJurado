@@ -1,13 +1,10 @@
-export interface DatosDivorcio {
-  domicilioConyugal: string;
-  fechaSeparacion: string;
+import { DatosPropuestasFamiliares } from './datos-propuestas-familiares';
+
+export interface DatosDivorcio extends DatosPropuestasFamiliares {
   duracionSeparacion: string;
   hijasHijosVivenCon: string;
   embarazoDemandado: string;
   dedicacionHogarCuidado: string;
-  propuestaGuardaCustodia: string;
-  propuestaConvivencia: string;
-  propuestaPension: string;
   bienesComunes: string;
   solicitarSeparacionProvisional: boolean;
   observaciones: string;

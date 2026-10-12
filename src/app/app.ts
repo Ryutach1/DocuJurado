@@ -5,8 +5,9 @@ import { CasoService } from './services/caso.service';
 import { Demandante, Demandado, Hijo, Gastos } from './models';
 import { RevisionCaso } from './components/revision-caso/revision-caso';
 import { MusicPlayer } from './components/music-player/music-player';
-import { TipoDocumento } from './models/tipo-documento';
+import { ClavePlantilla, ModalidadLaboral, TipoDocumento } from './models/tipo-documento';
 import { Abogado } from './models/abogado';
+import { CONCEPTOS_GASTO } from './models/concepto-gasto';
 
 @Component({
   selector: 'app-root',
@@ -17,20 +18,25 @@ import { Abogado } from './models/abogado';
 })
 export class App {
   private casoService = inject(CasoService);
-  readonly templateFile = signal<File | null>(null);
-  readonly plantillasPorTipo = signal<
-    Record<
-      TipoDocumento | 'pension-con-relacion-laboral' | 'pension-sin-relacion-laboral',
-      File | null
-    >
-  >({
-    pension: null,
+  readonly plantillasPorTipo = signal<Record<ClavePlantilla, File | null>>({
     'pension-con-relacion-laboral': null,
     'pension-sin-relacion-laboral': null,
     divorcio: null,
     separacion: null,
   });
   readonly tipoDocumento = signal<TipoDocumento>('pension');
+  private readonly modalidadLaboral = signal<ModalidadLaboral>('con-relacion-laboral');
+  readonly clavePlantillaActual = computed<ClavePlantilla>(() => {
+    const tipoDocumento = this.tipoDocumento();
+    if (tipoDocumento === 'divorcio' || tipoDocumento === 'separacion') {
+      return tipoDocumento;
+    }
+
+    return this.modalidadLaboral() === 'con-relacion-laboral'
+      ? 'pension-con-relacion-laboral'
+      : 'pension-sin-relacion-laboral';
+  });
+  readonly templateFile = computed(() => this.plantillasPorTipo()[this.clavePlantillaActual()]);
   readonly nombrePlantillaActual = computed(() => this.templateFile()?.name ?? null);
   private readonly documentosDisponibles: { id: TipoDocumento; nombre: string; detalle: string }[] =
     [
@@ -300,55 +306,12 @@ export class App {
     nombreReceptora: new FormControl('', { nonNullable: true }),
   });
 
-  conceptosGasto = [
-    {
-      clave: 'habitacion',
-      nombre: 'Habitación',
-      descripcion: 'Servicios públicos y mantenimiento del hogar',
-      periodo: 'Mensual',
-    },
-    {
-      clave: 'higiene',
-      nombre: 'Higiene',
-      descripcion: 'Artículos de higiene personal',
-      periodo: 'Mensual',
-    },
-    {
-      clave: 'transporte',
-      nombre: 'Transporte',
-      descripcion: 'Traslados de los menores',
-      periodo: 'Mensual',
-    },
-    {
-      clave: 'vestido',
-      nombre: 'Vestido y calzado',
-      descripcion: 'Vestuario de los menores',
-      periodo: 'Por temporada',
-    },
-    {
-      clave: 'despensa',
-      nombre: 'Despensa',
-      descripcion: 'Alimentación básica',
-      periodo: 'Semanal',
-    },
-    {
-      clave: 'salud',
-      nombre: 'Salud',
-      descripcion: 'Consultas, medicamentos y tratamientos',
-      periodo: 'Mensual',
-    },
-  ];
+  readonly conceptosGasto = CONCEPTOS_GASTO;
+
   get totalGastos(): number {
     const gastos = this.formularioGastos.getRawValue();
 
-    return (
-      gastos.habitacion.monto +
-      gastos.higiene.monto +
-      gastos.transporte.monto +
-      gastos.vestido.monto +
-      gastos.despensa.monto +
-      gastos.salud.monto
-    );
+    return this.conceptosGasto.reduce((total, { clave }) => total + gastos[clave].monto, 0);
   }
 
   continuar(): void {
@@ -395,10 +358,9 @@ export class App {
   }
 
   onTemplateSelected(template: File | null): void {
-    this.templateFile.set(template);
     this.plantillasPorTipo.update((plantillas) => ({
       ...plantillas,
-      [this.clavePlantillaActual]: template,
+      [this.clavePlantillaActual()]: template,
     }));
   }
 
@@ -420,13 +382,10 @@ export class App {
     this.guardarDatosDocumentales();
     this.tipoDocumento.set(tipo);
     this.casoService.actualizarTipoDocumento(tipo);
-    this.templateFile.set(this.plantillasPorTipo()[this.clavePlantillaActual]);
   }
 
   actualizarPlantillaPorModalidad(): void {
-    if (this.tipoDocumento() === 'pension') {
-      this.templateFile.set(this.plantillasPorTipo()[this.clavePlantillaActual]);
-    }
+    this.modalidadLaboral.set(this.formularioDatosPension.controls.modalidadLaboral.value);
   }
 
   validarCondicionSeparacion(): void {
@@ -438,16 +397,6 @@ export class App {
     if (this.tipoDocumento() === 'separacion') {
       this.seleccionarTipoDocumento('divorcio');
     }
-  }
-
-  private get clavePlantillaActual():
-    TipoDocumento | 'pension-con-relacion-laboral' | 'pension-sin-relacion-laboral' {
-    if (this.tipoDocumento() !== 'pension') {
-      return this.tipoDocumento();
-    }
-    return this.formularioDatosPension.controls.modalidadLaboral.value === 'con-relacion-laboral'
-      ? 'pension-con-relacion-laboral'
-      : 'pension-sin-relacion-laboral';
   }
 
   private guardarDatosDocumentales(): void {

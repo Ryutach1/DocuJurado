@@ -1,3 +1,5 @@
+import { DatosActaNacimiento } from './datos-registro-civil';
+
 export interface Hijo {
   nombre: string;
   nombres?: string;
@@ -7,12 +9,6 @@ export interface Hijo {
   escolaridad: string;
   generoGramatical?: '' | 'femenino' | 'masculino';
   fechaNacimiento?: string;
-  actaNacimiento?: {
-    numeroActa: string;
-    libro: string;
-    oficialia: string;
-    oficial: string;
-    numeroCertificado: string;
-  };
+  actaNacimiento?: DatosActaNacimiento;
   identificadorElectronicoNacimiento?: string;
 }

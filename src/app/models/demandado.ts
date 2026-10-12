@@ -1,27 +1,12 @@
-export interface Demandado {
-  nombre: string;
+import { PersonaBase } from './persona-base';
 
-  edad: number;
-
-  ocupacion: string;
-
-  escolaridad: string;
-
-  direccion: string;
-
+export interface Demandado extends PersonaBase {
   lugarNacimiento?: string;
-
   fechaNacimiento?: string;
-
   curp?: string;
-
   nss?: string;
-
   rfc?: string;
-
   nombreEmpresa: string;
-
   domicilioEmpresa: string;
-
   ingresosMensuales?: number;
 }

@@ -4,6 +4,12 @@ DocuJurado captura datos con formularios distintos según el escrito y sustituye
 `{{...}}` en una copia de la plantilla `.docx` que la persona selecciona. El texto jurídico fijo
 permanece en el Word de origen; la aplicación solo completa sus campos variables.
 
+Los modelos comparten una base de datos de persona para los campos comunes, mientras cada rol
+mantiene sus atributos propios. Los datos específicos de divorcio, separación y pensión permanecen
+en sus modelos documentales independientes. La lista de conceptos de gasto es la fuente central de
+sus nombres y periodicidades; para incorporar un nuevo concepto, actualiza esa definición y su
+control de importe.
+
 ## Datos compartidos de las partes
 
 Estos son los datos generales que la aplicación solicita en los formularios:
