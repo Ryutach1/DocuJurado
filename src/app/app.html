@@ -76,7 +76,7 @@
     </div>
 
     <div class="sidebar-footer">
-      <span class="version-label">Versión 0.1.9 · En desarrollo</span>
+      <span class="version-label">Versión 0.1.10 · En desarrollo</span>
       <span>Los datos de prueba no deben ser reales.</span>
     </div>
   </aside>
@@ -533,10 +533,38 @@
                 </div>
 
                 <details class="child-record-details">
-                  <summary>Identificador del acta de nacimiento (opcional)</summary>
+                  <summary>Nombre por partes para plantillas personalizadas (opcional)</summary>
+                  <p class="field-hint">
+                    Si completas estos campos, se usan para formar el nombre completo; si no, se
+                    conserva el nombre completo capturado arriba.
+                  </p>
+                  <div class="form-group">
+                    <label [for]="'nombresHijo-' + i">Nombre(s)</label>
+                    <input type="text" [id]="'nombresHijo-' + i" formControlName="nombres" />
+                  </div>
+                  <div class="form-group">
+                    <label [for]="'apellidoPaternoHijo-' + i">Apellido paterno</label>
+                    <input
+                      type="text"
+                      [id]="'apellidoPaternoHijo-' + i"
+                      formControlName="apellidoPaterno"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label [for]="'apellidoMaternoHijo-' + i">Apellido materno</label>
+                    <input
+                      type="text"
+                      [id]="'apellidoMaternoHijo-' + i"
+                      formControlName="apellidoMaterno"
+                    />
+                  </div>
+                </details>
+
+                <details class="child-record-details">
+                  <summary>Identificador electrónico del acta (opcional)</summary>
                   <div class="form-group">
                     <label [for]="'identificadorElectronicoHijo-' + i">
-                      Identificador electrónico del acta (prueba oficial)
+                      Identificador electrónico del acta
                     </label>
                     <input
                       type="text"
@@ -545,6 +573,61 @@
                     />
                   </div>
                 </details>
+
+                @if (
+                  tipoDocumento() === 'pension' &&
+                  formularioDatosPension.controls.modalidadLaboral.value === 'sin-relacion-laboral'
+                ) {
+                  <details class="child-record-details">
+                    <summary>Datos del acta de nacimiento (prueba documental)</summary>
+                    <div class="form-group">
+                      <label [for]="'fechaNacimientoHijo-' + i">Fecha de nacimiento</label>
+                      <input
+                        type="date"
+                        [id]="'fechaNacimientoHijo-' + i"
+                        formControlName="fechaNacimiento"
+                      />
+                    </div>
+                    <div formGroupName="actaNacimiento" class="form-grid">
+                      <div class="form-group">
+                        <label [for]="'numeroActaHijo-' + i">Número de acta</label>
+                        <input
+                          type="text"
+                          [id]="'numeroActaHijo-' + i"
+                          formControlName="numeroActa"
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label [for]="'libroActaHijo-' + i">Libro</label>
+                        <input type="text" [id]="'libroActaHijo-' + i" formControlName="libro" />
+                      </div>
+                      <div class="form-group">
+                        <label [for]="'oficialiaActaHijo-' + i">Oficialía</label>
+                        <input
+                          type="text"
+                          [id]="'oficialiaActaHijo-' + i"
+                          formControlName="oficialia"
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label [for]="'oficialRegistroHijo-' + i">Oficial del Registro Civil</label>
+                        <input
+                          type="text"
+                          [id]="'oficialRegistroHijo-' + i"
+                          formControlName="oficial"
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label [for]="'numeroCertificadoHijo-' + i">Número de certificado</label>
+                        <input
+                          type="text"
+                          [id]="'numeroCertificadoHijo-' + i"
+                          formControlName="numeroCertificado"
+                        />
+                      </div>
+                    </div>
+                  </details>
+                }
               </div>
             </div>
           }

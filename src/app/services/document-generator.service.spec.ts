@@ -40,7 +40,11 @@ const caso: Caso = {
       generoGramatical: 'femenino',
       identificadorElectronicoNacimiento: 'ID-ELECTRONICO-1',
     },
-    { nombre: 'Sam Ejemplo', edad: 5, escolaridad: 'Preescolar' },
+    {
+      nombre: 'Sam Ejemplo',
+      edad: 5,
+      escolaridad: 'Preescolar',
+    },
   ],
   gastos: {
     habitacion: { monto: 4500, periodicidad: 'Mensual' },
@@ -214,6 +218,60 @@ describe('DocumentGeneratorService', () => {
     const generatedXml = new PizZip(await result.arrayBuffer()).file('word/document.xml')?.asText();
 
     expect(generatedXml).toContain('15000');
+  });
+
+  it('maps birth certificate details only for the pension without employment variant', async () => {
+    const template = createTemplateFile(
+      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{hijos.0.nombres}}|{{hijos.0.apellidoPaterno}}|{{hijos.0.apellidoMaterno}}|{{hijos.0.fechaNacimiento}}|{{hijos.0.actaNacimiento.numeroActa}}|{{hijos.0.actaNacimiento.libro}}|{{hijos.0.actaNacimiento.oficialia}}|{{hijos.0.actaNacimiento.oficial}}|{{hijos.0.actaNacimiento.numeroCertificado}}|{{hijos.0.identificadorElectronicoNacimiento}}|{{hijos.nombresSeparados}}|{{hijos.apellidosCompartidos}}|{{hijos.nombresConApellidos}}</w:t></w:r></w:p><w:sectPr/></w:body></w:document>',
+    );
+    const casoSinRelacion = {
+      ...caso,
+      hijos: [
+        {
+          ...caso.hijos[0],
+          nombres: 'Alex',
+          apellidoPaterno: 'Ejemplo',
+          apellidoMaterno: 'Prueba',
+          fechaNacimiento: '2018-06-05',
+          actaNacimiento: {
+            numeroActa: 'ACTA-PRUEBA-1',
+            libro: 'LIBRO-PRUEBA-1',
+            oficialia: 'OFICIALIA-PRUEBA-1',
+            oficial: 'OFICIAL-PRUEBA-1',
+            numeroCertificado: 'CERTIFICADO-PRUEBA-1',
+          },
+        },
+        {
+          ...caso.hijos[1],
+          nombres: 'Sam',
+          apellidoPaterno: 'Ejemplo',
+          apellidoMaterno: 'Prueba',
+        },
+      ],
+      datosPension: { ...caso.datosPension, modalidadLaboral: 'sin-relacion-laboral' as const },
+    };
+    const resultadoSinRelacion = await service.generateDocument(template, casoSinRelacion);
+    const xmlSinRelacion = new PizZip(await resultadoSinRelacion.arrayBuffer())
+      .file('word/document.xml')
+      ?.asText();
+    expect(xmlSinRelacion).toContain(
+      'ACTA-PRUEBA-1|LIBRO-PRUEBA-1|OFICIALIA-PRUEBA-1|OFICIAL-PRUEBA-1|CERTIFICADO-PRUEBA-1|ID-ELECTRONICO-1|Alex y Sam|Ejemplo Prueba|Alex Ejemplo Prueba y Sam Ejemplo Prueba',
+    );
+    expect(xmlSinRelacion).toMatch(/Alex\|Ejemplo\|Prueba\|[^|]+\|ACTA-PRUEBA-1/);
+
+    const casoConRelacion = {
+      ...casoSinRelacion,
+      datosPension: {
+        ...casoSinRelacion.datosPension,
+        modalidadLaboral: 'con-relacion-laboral' as const,
+      },
+    };
+    const resultadoConRelacion = await service.generateDocument(template, casoConRelacion);
+    const xmlConRelacion = new PizZip(await resultadoConRelacion.arrayBuffer())
+      .file('word/document.xml')
+      ?.asText();
+    expect(xmlConRelacion).toContain('Prueba|||||||ID-ELECTRONICO-1|Alex y Sam');
+    expect(xmlConRelacion).not.toContain('ACTA-PRUEBA-1');
   });
 
   it('does not carry bank or applicant income data into unrelated document variants', async () => {

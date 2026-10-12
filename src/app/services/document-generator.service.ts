@@ -55,7 +55,42 @@ function buildTemplateData(caso: Caso) {
   const esPension = caso.tipoDocumento === 'pension';
   const pensionConRelacionLaboral =
     esPension && caso.datosPension.modalidadLaboral === 'con-relacion-laboral';
+  const pensionSinRelacionLaboral =
+    esPension && caso.datosPension.modalidadLaboral === 'sin-relacion-laboral';
   const esDivorcio = caso.tipoDocumento === 'divorcio';
+  const hijosParaPlantilla = caso.hijos.map((hijo) => {
+    const nombres = hijo.nombres?.trim() ?? '';
+    const apellidoPaterno = hijo.apellidoPaterno?.trim() ?? '';
+    const apellidoMaterno = hijo.apellidoMaterno?.trim() ?? '';
+    const nombreCompleto =
+      [nombres, apellidoPaterno, apellidoMaterno].filter(Boolean).join(' ') || hijo.nombre;
+    const actaNacimiento = pensionSinRelacionLaboral
+      ? {
+          numeroActa: hijo.actaNacimiento?.numeroActa ?? '',
+          libro: hijo.actaNacimiento?.libro ?? '',
+          oficialia: hijo.actaNacimiento?.oficialia ?? '',
+          oficial: hijo.actaNacimiento?.oficial ?? '',
+          numeroCertificado: hijo.actaNacimiento?.numeroCertificado ?? '',
+        }
+      : {
+          numeroActa: '',
+          libro: '',
+          oficialia: '',
+          oficial: '',
+          numeroCertificado: '',
+        };
+
+    return {
+      ...hijo,
+      nombre: nombreCompleto,
+      nombres,
+      apellidoPaterno,
+      apellidoMaterno,
+      fechaNacimiento: pensionSinRelacionLaboral ? formatTemplateDate(hijo.fechaNacimiento) : '',
+      actaNacimiento,
+      identificadorElectronicoNacimiento: hijo.identificadorElectronicoNacimiento ?? '',
+    };
+  });
   const data: Record<string, unknown> = {
     numeroExpediente: caso.numeroExpediente,
     tipoDocumento: caso.tipoDocumento,
@@ -87,7 +122,7 @@ function buildTemplateData(caso: Caso) {
     'demandado.domicilioEmpresa': pensionConRelacionLaboral ? caso.demandado.domicilioEmpresa : '',
     'demandado.ingresosMensuales':
       esPension || esDivorcio ? (caso.demandado.ingresosMensuales ?? '') : '',
-    hijos: caso.hijos.map((hijo) => ({ ...hijo })),
+    hijos: hijosParaPlantilla,
     'abogado.nombre': caso.abogado.nombre,
     'abogado.cedulaProfesional': caso.abogado.cedulaProfesional,
     'abogado.fechaRecepcionPapeleria': formatTemplateDate(caso.abogado.fechaRecepcionPapeleria),
@@ -101,6 +136,33 @@ function buildTemplateData(caso: Caso) {
     nombresHijos.length < 2
       ? (nombresHijos[0] ?? '')
       : `${nombresHijos.slice(0, -1).join(', ')} y ${nombresHijos[nombresHijos.length - 1]}`;
+  const nombresSeparados = hijosParaPlantilla
+    .map((hijo) => hijo.nombres)
+    .filter((nombre) => nombre.length > 0);
+  data['hijos.nombresSeparados'] =
+    nombresSeparados.length < 2
+      ? (nombresSeparados[0] ?? '')
+      : `${nombresSeparados.slice(0, -1).join(', ')} y ${nombresSeparados[nombresSeparados.length - 1]}`;
+  const apellidosCompletos = hijosParaPlantilla.map((hijo) =>
+    [hijo.apellidoPaterno, hijo.apellidoMaterno].filter(Boolean).join(' '),
+  );
+  const apellidosUniformes =
+    apellidosCompletos.length > 0 &&
+    apellidosCompletos.every(
+      (apellidos) => apellidos.length > 0 && apellidos === apellidosCompletos[0],
+    );
+  data['hijos.apellidosCompartidos'] = apellidosUniformes ? apellidosCompletos[0] : '';
+  const nombresConApellidos = hijosParaPlantilla
+    .map(
+      (hijo) =>
+        [hijo.nombres, hijo.apellidoPaterno, hijo.apellidoMaterno].filter(Boolean).join(' ') ||
+        hijo.nombre,
+    )
+    .filter((nombre) => nombre.length > 0);
+  data['hijos.nombresConApellidos'] =
+    nombresConApellidos.length < 2
+      ? (nombresConApellidos[0] ?? '')
+      : `${nombresConApellidos.slice(0, -1).join(', ')} y ${nombresConApellidos[nombresConApellidos.length - 1]}`;
   data['hijos.cantidad'] = nombresHijos.length;
 
   const hijosConGenero = caso.hijos.filter((hijo) => hijo.nombre.trim().length > 0);
@@ -124,13 +186,22 @@ function buildTemplateData(caso: Caso) {
     data['hijos.referencia'] = '';
   }
 
-  for (const [index, hijo] of caso.hijos.entries()) {
+  for (const [index, hijo] of hijosParaPlantilla.entries()) {
     data[`hijos.${index}.nombre`] = hijo.nombre;
+    data[`hijos.${index}.nombres`] = hijo.nombres;
+    data[`hijos.${index}.apellidoPaterno`] = hijo.apellidoPaterno;
+    data[`hijos.${index}.apellidoMaterno`] = hijo.apellidoMaterno;
     data[`hijos.${index}.edad`] = hijo.edad;
     data[`hijos.${index}.escolaridad`] = hijo.escolaridad;
     data[`hijos.${index}.generoGramatical`] = hijo.generoGramatical ?? '';
+    data[`hijos.${index}.fechaNacimiento`] = hijo.fechaNacimiento;
+    data[`hijos.${index}.actaNacimiento.numeroActa`] = hijo.actaNacimiento.numeroActa;
+    data[`hijos.${index}.actaNacimiento.libro`] = hijo.actaNacimiento.libro;
+    data[`hijos.${index}.actaNacimiento.oficialia`] = hijo.actaNacimiento.oficialia;
+    data[`hijos.${index}.actaNacimiento.oficial`] = hijo.actaNacimiento.oficial;
+    data[`hijos.${index}.actaNacimiento.numeroCertificado`] = hijo.actaNacimiento.numeroCertificado;
     data[`hijos.${index}.identificadorElectronicoNacimiento`] =
-      hijo.identificadorElectronicoNacimiento ?? '';
+      hijo.identificadorElectronicoNacimiento;
   }
 
   const { datosMatrimonio, datosPension, datosDivorcio, datosSeparacion } = caso;
@@ -188,7 +259,7 @@ export class DocumentGeneratorService {
         linebreaks: true,
         nullGetter: (part) => {
           const isOutOfRangeChildField =
-            /^hijos\.\d+\.(nombre|edad|escolaridad|identificadorElectronicoNacimiento)$/.test(
+            /^hijos\.\d+\.(nombre|nombres|apellidoPaterno|apellidoMaterno|edad|escolaridad|generoGramatical|fechaNacimiento|identificadorElectronicoNacimiento|actaNacimiento\.(numeroActa|libro|oficialia|oficial|numeroCertificado))$/.test(
               part.value,
             );
 

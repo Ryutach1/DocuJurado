@@ -35,11 +35,23 @@ Estos son los datos generales que la aplicación solicita en los formularios:
 {{demandado.ingresosMensuales}}
 
 {{hijos.0.nombre}}
+{{hijos.0.nombres}}
+{{hijos.0.apellidoPaterno}}
+{{hijos.0.apellidoMaterno}}
 {{hijos.0.edad}}
 {{hijos.0.escolaridad}}
 {{hijos.0.generoGramatical}}
+{{hijos.0.fechaNacimiento}}
+{{hijos.0.actaNacimiento.numeroActa}}
+{{hijos.0.actaNacimiento.libro}}
+{{hijos.0.actaNacimiento.oficialia}}
+{{hijos.0.actaNacimiento.oficial}}
+{{hijos.0.actaNacimiento.numeroCertificado}}
 {{hijos.0.identificadorElectronicoNacimiento}}
 {{hijos.nombres}}
+{{hijos.nombresSeparados}}
+{{hijos.apellidosCompartidos}}
+{{hijos.nombresConApellidos}}
 {{hijos.cantidad}}
 {{hijos.referencia}}
 {{numeroExpediente}}
@@ -47,9 +59,10 @@ Estos son los datos generales que la aplicación solicita en los formularios:
 {{abogado.nombreReceptora}}
 ```
 
-La aplicación no solicita fecha de nacimiento de hijas e hijos ni CURP/RFC de la promovente.
-Algunos campos de esta lista solo aplican a un documento o modalidad; fuera de ella, sus etiquetas
-se reemplazan por texto vacío para evitar arrastrar datos de otro escrito.
+La fecha de nacimiento y los datos registrales de cada hija o hijo solo se solicitan para pensión
+sin relación laboral. La aplicación no solicita CURP/RFC de la promovente. Algunos campos de esta
+lista solo aplican a un documento o modalidad; fuera de ella, sus etiquetas se reemplazan por texto
+vacío para evitar arrastrar datos de otro escrito.
 
 `hijos.0` representa a la primera hija o hijo; el índice comienza en cero. Para mostrar nombres y
 cantidades variables, se puede usar `{{hijos.nombres}}` y `{{hijos.cantidad}}`. También se admite un
@@ -61,6 +74,14 @@ bloque de repetición:
 {{/hijos}}
 ```
 
+Para plantillas personalizadas, los nombres se capturan en partes sin retirar `{{hijos.0.nombre}}`,
+que sigue representando el nombre completo por compatibilidad. Si el formulario contiene Nombre(s),
+apellido paterno o apellido materno, esos componentes forman el nombre completo. Usa
+`{{hijos.nombresSeparados}} de apellidos {{hijos.apellidosCompartidos}}` cuando todas las hijas e
+hijos compartan ambos apellidos; si no, usa `{{hijos.nombresConApellidos}}`, que conserva los
+apellidos de cada persona. Para plantillas que necesiten control fino, dentro del bloque repetible
+están disponibles `{{nombres}}`, `{{apellidoPaterno}}` y `{{apellidoMaterno}}`.
+
 `{{hijos.referencia}}` construye una forma coherente para expresiones como «mi menor hija»,
 «mi menor hijo», «mis hijas menores» o «mis hijos menores», usando la cantidad de personas
 capturadas y el género gramatical indicado en su formulario. Si no se especifica, usa una forma
@@ -68,9 +89,21 @@ neutral («mi hija o hijo menor» / «mis hijas e hijos menores»); no intenta d
 nombre. Usa esta etiqueta en lugar de escribir literalmente una referencia que podría quedar en
 singular o plural incorrecto.
 
-El identificador electrónico del acta de nacimiento es el único dato de esa acta que se captura
-para el cuerpo probatorio de las plantillas de pensión. Oficialía, libro, número de acta y municipio
-no se piden para cada hija o hijo ni deben etiquetarse en esas demandas.
+La pensión con relación laboral solo utiliza el identificador electrónico del acta de nacimiento.
+La plantilla de pensión sin relación laboral también admite fecha de nacimiento y datos del acta
+por hija o hijo:
+
+```text
+{{hijos.0.fechaNacimiento}}
+{{hijos.0.actaNacimiento.numeroActa}}
+{{hijos.0.actaNacimiento.libro}}
+{{hijos.0.actaNacimiento.oficialia}}
+{{hijos.0.actaNacimiento.oficial}}
+{{hijos.0.actaNacimiento.numeroCertificado}}
+```
+
+Dentro de un bloque `{{#hijos}}...{{/hijos}}`, se omite el prefijo de índice; por ejemplo,
+`{{actaNacimiento.numeroActa}}`. Estos datos solo se incluyen en la variante sin relación laboral.
 
 ## Pensión alimenticia con relación laboral
 

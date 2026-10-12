@@ -120,9 +120,20 @@ export class App {
   formularioHijos = new FormArray<
     FormGroup<{
       nombre: FormControl<string>;
+      nombres: FormControl<string>;
+      apellidoPaterno: FormControl<string>;
+      apellidoMaterno: FormControl<string>;
       edad: FormControl<number>;
       escolaridad: FormControl<string>;
       generoGramatical: FormControl<'' | 'femenino' | 'masculino'>;
+      fechaNacimiento: FormControl<string>;
+      actaNacimiento: FormGroup<{
+        numeroActa: FormControl<string>;
+        libro: FormControl<string>;
+        oficialia: FormControl<string>;
+        oficial: FormControl<string>;
+        numeroCertificado: FormControl<string>;
+      }>;
       identificadorElectronicoNacimiento: FormControl<string>;
     }>
   >([]);
@@ -168,12 +179,28 @@ export class App {
       new FormGroup({
         nombre: new FormControl('', { nonNullable: true }),
 
+        nombres: new FormControl('', { nonNullable: true }),
+
+        apellidoPaterno: new FormControl('', { nonNullable: true }),
+
+        apellidoMaterno: new FormControl('', { nonNullable: true }),
+
         edad: new FormControl(0, { nonNullable: true }),
 
         escolaridad: new FormControl('', { nonNullable: true }),
 
         generoGramatical: new FormControl<'' | 'femenino' | 'masculino'>('', {
           nonNullable: true,
+        }),
+
+        fechaNacimiento: new FormControl('', { nonNullable: true }),
+
+        actaNacimiento: new FormGroup({
+          numeroActa: new FormControl('', { nonNullable: true }),
+          libro: new FormControl('', { nonNullable: true }),
+          oficialia: new FormControl('', { nonNullable: true }),
+          oficial: new FormControl('', { nonNullable: true }),
+          numeroCertificado: new FormControl('', { nonNullable: true }),
         }),
 
         identificadorElectronicoNacimiento: new FormControl('', { nonNullable: true }),
@@ -337,7 +364,11 @@ export class App {
         break;
 
       case 3:
-        const hijos: Hijo[] = this.formularioHijos.getRawValue();
+        const hijos: Hijo[] = this.formularioHijos.getRawValue().map((hijo) => ({
+          ...hijo,
+          nombre: this.nombreCompletoHijo(hijo) || hijo.nombre,
+          actaNacimiento: { ...hijo.actaNacimiento },
+        }));
         this.casoService.actualizarHijos(hijos);
         break;
 
@@ -369,6 +400,17 @@ export class App {
       ...plantillas,
       [this.clavePlantillaActual]: template,
     }));
+  }
+
+  private nombreCompletoHijo(hijo: {
+    nombres: string;
+    apellidoPaterno: string;
+    apellidoMaterno: string;
+  }): string {
+    return [hijo.nombres, hijo.apellidoPaterno, hijo.apellidoMaterno]
+      .map((parte) => parte.trim())
+      .filter(Boolean)
+      .join(' ');
   }
 
   seleccionarTipoDocumento(tipo: TipoDocumento): void {
