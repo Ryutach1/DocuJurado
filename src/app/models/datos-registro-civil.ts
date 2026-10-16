@@ -9,6 +9,7 @@ export interface DatosRegistroCivil extends DatosActaCivil {
 }
 
 export interface DatosActaNacimiento extends DatosActaCivil {
+  municipio: string;
   oficial: string;
   numeroCertificado: string;
 }

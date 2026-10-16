@@ -76,7 +76,7 @@
     </div>
 
     <div class="sidebar-footer">
-      <span class="version-label">Versión 0.1.12 · En desarrollo</span>
+      <span class="version-label">Versión 0.1.16 · En desarrollo</span>
       <span>Los datos de prueba no deben ser reales.</span>
     </div>
   </aside>
@@ -607,6 +607,14 @@
                           type="text"
                           [id]="'oficialiaActaHijo-' + i"
                           formControlName="oficialia"
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label [for]="'municipioActaHijo-' + i">Municipio de registro</label>
+                        <input
+                          type="text"
+                          [id]="'municipioActaHijo-' + i"
+                          formControlName="municipio"
                         />
                       </div>
                       <div class="form-group">

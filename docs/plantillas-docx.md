@@ -4,6 +4,15 @@ DocuJurado captura datos con formularios distintos según el escrito y sustituye
 `{{...}}` en una copia de la plantilla `.docx` que la persona selecciona. El texto jurídico fijo
 permanece en el Word de origen; la aplicación solo completa sus campos variables.
 
+## Generación, vista previa y descarga
+
+En el paso de revisión, la aplicación usa PizZip y Docxtemplater para producir una copia del DOCX
+seleccionado con los datos del caso. La vista previa se representa localmente desde esa misma copia;
+no se envían el documento ni los datos a un servicio externo. El render HTML puede diferir de Word en
+la paginación o en detalles de fuentes, pero la descarga conserva el DOCX generado desde la plantilla.
+El botón de descarga queda habilitado al generar el DOCX; si falla el renderizado en el navegador, el
+archivo generado aún puede descargarse con FileSaver.
+
 Los modelos comparten una base de datos de persona para los campos comunes, mientras cada rol
 mantiene sus atributos propios. Los datos específicos de divorcio, separación y pensión permanecen
 en sus modelos documentales independientes. La lista de conceptos de gasto es la fuente central de
@@ -51,8 +60,12 @@ Estos son los datos generales que la aplicación solicita en los formularios:
 {{hijos.0.actaNacimiento.numeroActa}}
 {{hijos.0.actaNacimiento.libro}}
 {{hijos.0.actaNacimiento.oficialia}}
+{{hijos.0.actaNacimiento.municipio}}
 {{hijos.0.actaNacimiento.oficial}}
 {{hijos.0.actaNacimiento.numeroCertificado}}
+{{hijos.0.numeroPruebaPension}}
+{{hijos.0.numeroPruebaDivorcio}}
+{{hijos.0.referenciaNacimiento}}
 {{hijos.0.identificadorElectronicoNacimiento}}
 {{hijos.nombres}}
 {{hijos.nombresSeparados}}
@@ -60,6 +73,7 @@ Estos son los datos generales que la aplicación solicita en los formularios:
 {{hijos.nombresConApellidos}}
 {{hijos.cantidad}}
 {{hijos.referencia}}
+{{hijos.resumenEscolaridad}}
 {{numeroExpediente}}
 {{abogado.fechaRecepcionPapeleria}}
 {{abogado.nombreReceptora}}
@@ -94,6 +108,8 @@ capturadas y el género gramatical indicado en su formulario. Si no se especific
 neutral («mi hija o hijo menor» / «mis hijas e hijos menores»); no intenta deducirlo a partir del
 nombre. Usa esta etiqueta en lugar de escribir literalmente una referencia que podría quedar en
 singular o plural incorrecto.
+`{{hijos.resumenEscolaridad}}` reúne el nombre, la edad y, cuando se captura, la escolaridad de
+cada hija o hijo en una lista con conectores adecuados.
 
 La pensión con relación laboral solo utiliza el identificador electrónico del acta de nacimiento.
 La plantilla de pensión sin relación laboral también admite fecha de nacimiento y datos del acta
@@ -104,12 +120,28 @@ por hija o hijo:
 {{hijos.0.actaNacimiento.numeroActa}}
 {{hijos.0.actaNacimiento.libro}}
 {{hijos.0.actaNacimiento.oficialia}}
+{{hijos.0.actaNacimiento.municipio}}
 {{hijos.0.actaNacimiento.oficial}}
 {{hijos.0.actaNacimiento.numeroCertificado}}
 ```
 
 Dentro de un bloque `{{#hijos}}...{{/hijos}}`, se omite el prefijo de índice; por ejemplo,
 `{{actaNacimiento.numeroActa}}`. Estos datos solo se incluyen en la variante sin relación laboral.
+Para repetir pruebas de nacimiento con numeración variable, incluye la prueba completa entre
+`{{#hijos}}` y `{{/hijos}}`; usa `{{numeroPruebaPension}}` para números romanos de pensión y
+`{{numeroPruebaDivorcio}}` para números arábigos de divorcio. Usa `{{referenciaNacimiento}}` para
+una referencia singular que respeta el género gramatical indicado. La aplicación desplaza los
+números de las pruebas posteriores según la cantidad de hijas e hijos.
+
+Las pruebas posteriores pueden usar `{{pruebasPension.numeroIngresos}}`,
+`{{pruebasPension.numeroIMSS}}`, `{{pruebasPension.numeroSAT}}`,
+`{{pruebasPension.numeroRegistro}}`, `{{pruebasPension.numeroPresuncional}}`,
+`{{pruebasPension.numeroActuaciones}}`, `{{pruebasDivorcio.numeroActuaciones}}`,
+`{{pruebasDivorcio.numeroPresuncional}}` y `{{pruebasDivorcio.numeroInstrumental}}`.
+La plantilla laboral también puede numerar los comprobantes de domicilio, tickets de gastos,
+instrumental de actuaciones y presuncional con `{{pruebasPension.numeroComprobantesDomicilio}}`,
+`{{pruebasPension.numeroTicketsGastos}}`, `{{pruebasPension.numeroActuacionesLaboral}}` y
+`{{pruebasPension.numeroPresuncionalLaboral}}`, respectivamente.
 
 ## Pensión alimenticia con relación laboral
 
@@ -134,11 +166,20 @@ Usa una plantilla propia que contemple empleo, empresa y gastos:
 {{gastos.despensa.periodicidad}}
 {{gastos.salud.monto}}
 {{gastos.salud.periodicidad}}
+{{gastos.total}}
 ```
 
 Esta es la única variante de pensión que solicita y muestra el desglose de gastos en la interfaz.
+`{{gastos.total}}` coincide con la suma de importes que se muestra en el formulario; respeta el
+valor capturado para cada periodicidad y no convierte importes semanales o por temporada.
 En esta modalidad también se capturan los datos bancarios de la promovente para las etiquetas
 `{{demandante.clabeInterbancaria}}` y `{{demandante.banco}}`.
+La copia de plantilla convierte las pruebas de nacimiento en un bloque repetible por hija o hijo
+y usa el identificador electrónico del acta. La vivienda se representa con el importe total de
+habitación; no se desglosan electricidad, agua ni gas. Las afirmaciones no cubiertas por el
+formulario (por ejemplo, vínculo y duración de la relación, incumplimiento, seguridad social o
+existencia de comprobantes) quedan marcadas en el documento para revisión jurídica y deben
+confirmarse antes de usarlo.
 
 ## Pensión alimenticia sin relación laboral
 
@@ -206,6 +247,12 @@ mayúsculas, acentos, espacios repetidos y puntuación común.
 {{datosSeparacion.medidasSolicitadas}}
 {{datosSeparacion.observaciones}}
 ```
+
+La copia de plantilla repite el anexo de acta de nacimiento por hija o hijo y usa
+`{{hijos.resumenEscolaridad}}` para exponer nombre, edad y escolaridad sin afirmar una situación
+laboral fija. El régimen patrimonial no se incluye. Las afirmaciones fácticas que no recoge el
+formulario se conservan con marcas de revisión jurídica y deben confirmarse antes de usar el
+escrito.
 
 ## Notas para preparar una plantilla
 

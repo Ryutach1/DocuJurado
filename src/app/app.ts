@@ -137,6 +137,7 @@ export class App {
         numeroActa: FormControl<string>;
         libro: FormControl<string>;
         oficialia: FormControl<string>;
+        municipio: FormControl<string>;
         oficial: FormControl<string>;
         numeroCertificado: FormControl<string>;
       }>;
@@ -205,6 +206,7 @@ export class App {
           numeroActa: new FormControl('', { nonNullable: true }),
           libro: new FormControl('', { nonNullable: true }),
           oficialia: new FormControl('', { nonNullable: true }),
+          municipio: new FormControl('', { nonNullable: true }),
           oficial: new FormControl('', { nonNullable: true }),
           numeroCertificado: new FormControl('', { nonNullable: true }),
         }),

@@ -1,7 +1,10 @@
+import { saveAs } from 'file-saver';
 import PizZip from 'pizzip';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { Caso } from '../models/caso';
 import { DocumentGeneratorService } from './document-generator.service';
+
+vi.mock('file-saver', () => ({ saveAs: vi.fn() }));
 
 const caso: Caso = {
   numeroExpediente: 'EXP-123',
@@ -117,7 +120,7 @@ function createTemplateFile(xml: string): File {
     '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>',
   );
   zip.file('word/document.xml', xml);
-  return new File([zip.generate({ type: 'uint8array' })], 'plantilla.docx');
+  return new File([zip.generate({ type: 'arraybuffer' })], 'plantilla.docx');
 }
 
 describe('DocumentGeneratorService', () => {
@@ -128,7 +131,11 @@ describe('DocumentGeneratorService', () => {
       '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{demandante.nombre}}</w:t></w:r></w:p><w:p><w:r><w:t>{{demandado.nombre}}</w:t></w:r></w:p><w:p><w:r><w:t>{{hijos.0.nombre}}|{{hijos.1.edad}}</w:t></w:r></w:p><w:p><w:r><w:t>{{#hijos}}{{nombre}}:{{edad}};{{/hijos}}</w:t></w:r></w:p><w:p><w:r><w:t>{{gastos.habitacion.monto}}|{{numeroExpediente}}</w:t></w:r></w:p><w:sectPr/></w:body></w:document>',
     );
 
-    const result = await service.generateDocument(template, caso);
+    const casoConRegistroVacio = {
+      ...caso,
+      hijos: [...caso.hijos, { nombre: '', edad: 0, escolaridad: '' }],
+    };
+    const result = await service.generateDocument(template, casoConRegistroVacio);
     const generatedXml = new PizZip(await result.arrayBuffer()).file('word/document.xml')?.asText();
 
     expect(generatedXml).toContain('Ana Ejemplo');
@@ -137,6 +144,28 @@ describe('DocumentGeneratorService', () => {
     expect(generatedXml).toContain('Alex Ejemplo:8;Sam Ejemplo:5;');
     expect(generatedXml).toContain('4500|EXP-123');
     expect(generatedXml).not.toContain('{{');
+  });
+
+  it('renders the generated DOCX into a browser-local preview', async () => {
+    const template = createTemplateFile(
+      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{demandante.nombre}}</w:t></w:r></w:p><w:sectPr/></w:body></w:document>',
+    );
+    const result = await service.generateDocument(template, caso);
+    const container = document.createElement('div');
+    const { renderAsync } = await import('docx-preview');
+
+    await renderAsync(result, container);
+
+    expect(container.textContent).toContain('Ana Ejemplo');
+    expect(container.querySelector('.docx')).not.toBeNull();
+  });
+
+  it('uses FileSaver to download the generated DOCX', () => {
+    const generatedDocument = new Blob(['generated docx']);
+
+    service.downloadDocument(generatedDocument, 'DocuJurado-pension.docx');
+
+    expect(saveAs).toHaveBeenCalledWith(generatedDocument, 'DocuJurado-pension.docx');
   });
 
   it('renders missing optional and out-of-range child data as blank', async () => {
@@ -186,6 +215,25 @@ describe('DocumentGeneratorService', () => {
     expect(generatedXml).toContain('mis hijas e hijos menores');
   });
 
+  it('numbers repeating birth evidence and shifts later proof numbers for each child', async () => {
+    const template = createTemplateFile(
+      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{#hijos}}</w:t></w:r></w:p><w:p><w:r><w:t>{{numeroPruebaPension}}|{{numeroPruebaDivorcio}}|{{referenciaNacimiento}};</w:t></w:r></w:p><w:p><w:r><w:t>{{/hijos}}</w:t></w:r></w:p><w:p><w:r><w:t>{{pruebasPension.numeroIngresos}}|{{pruebasPension.numeroIMSS}}|{{pruebasPension.numeroSAT}}|{{pruebasPension.numeroRegistro}}|{{pruebasPension.numeroPresuncional}}|{{pruebasPension.numeroActuaciones}}|{{pruebasDivorcio.numeroActuaciones}}|{{pruebasDivorcio.numeroPresuncional}}|{{pruebasDivorcio.numeroInstrumental}}</w:t></w:r></w:p><w:sectPr/></w:body></w:document>',
+    );
+
+    const casoConRegistroVacio = {
+      ...caso,
+      hijos: [...caso.hijos, { nombre: '', edad: 0, escolaridad: '' }],
+    };
+    const result = await service.generateDocument(template, casoConRegistroVacio);
+    const generatedXml = new PizZip(await result.arrayBuffer()).file('word/document.xml')?.asText();
+    const generatedText = generatedXml?.replace(/<[^>]+>/g, '');
+
+    expect(generatedText).toContain(
+      'I|2|nuestra hija;II|3|nuestro hijo o nuestra hija;III|IV|V|VI|VII|VIII|4|5|6',
+    );
+    expect(generatedText).not.toContain('{{');
+  });
+
   it('uses a singular child reference when one child is captured', async () => {
     const template = createTemplateFile(
       '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{hijos.referencia}}</w:t></w:r></w:p><w:sectPr/></w:body></w:document>',
@@ -222,7 +270,7 @@ describe('DocumentGeneratorService', () => {
 
   it('maps birth certificate details only for the pension without employment variant', async () => {
     const template = createTemplateFile(
-      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{hijos.0.nombres}}|{{hijos.0.apellidoPaterno}}|{{hijos.0.apellidoMaterno}}|{{hijos.0.fechaNacimiento}}|{{hijos.0.actaNacimiento.numeroActa}}|{{hijos.0.actaNacimiento.libro}}|{{hijos.0.actaNacimiento.oficialia}}|{{hijos.0.actaNacimiento.oficial}}|{{hijos.0.actaNacimiento.numeroCertificado}}|{{hijos.0.identificadorElectronicoNacimiento}}|{{hijos.nombresSeparados}}|{{hijos.apellidosCompartidos}}|{{hijos.nombresConApellidos}}</w:t></w:r></w:p><w:sectPr/></w:body></w:document>',
+      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{hijos.0.nombres}}|{{hijos.0.apellidoPaterno}}|{{hijos.0.apellidoMaterno}}|{{hijos.0.fechaNacimiento}}|{{hijos.0.actaNacimiento.numeroActa}}|{{hijos.0.actaNacimiento.libro}}|{{hijos.0.actaNacimiento.oficialia}}|{{hijos.0.actaNacimiento.municipio}}|{{hijos.0.actaNacimiento.oficial}}|{{hijos.0.actaNacimiento.numeroCertificado}}|{{hijos.0.identificadorElectronicoNacimiento}}|{{hijos.nombresSeparados}}|{{hijos.apellidosCompartidos}}|{{hijos.nombresConApellidos}}</w:t></w:r></w:p><w:sectPr/></w:body></w:document>',
     );
     const casoSinRelacion = {
       ...caso,
@@ -237,6 +285,7 @@ describe('DocumentGeneratorService', () => {
             numeroActa: 'ACTA-PRUEBA-1',
             libro: 'LIBRO-PRUEBA-1',
             oficialia: 'OFICIALIA-PRUEBA-1',
+            municipio: 'MUNICIPIO-PRUEBA-1',
             oficial: 'OFICIAL-PRUEBA-1',
             numeroCertificado: 'CERTIFICADO-PRUEBA-1',
           },
@@ -255,7 +304,7 @@ describe('DocumentGeneratorService', () => {
       .file('word/document.xml')
       ?.asText();
     expect(xmlSinRelacion).toContain(
-      'ACTA-PRUEBA-1|LIBRO-PRUEBA-1|OFICIALIA-PRUEBA-1|OFICIAL-PRUEBA-1|CERTIFICADO-PRUEBA-1|ID-ELECTRONICO-1|Alex y Sam|Ejemplo Prueba|Alex Ejemplo Prueba y Sam Ejemplo Prueba',
+      'ACTA-PRUEBA-1|LIBRO-PRUEBA-1|OFICIALIA-PRUEBA-1|MUNICIPIO-PRUEBA-1|OFICIAL-PRUEBA-1|CERTIFICADO-PRUEBA-1|ID-ELECTRONICO-1|Alex y Sam|Ejemplo Prueba|Alex Ejemplo Prueba y Sam Ejemplo Prueba',
     );
     expect(xmlSinRelacion).toMatch(/Alex\|Ejemplo\|Prueba\|[^|]+\|ACTA-PRUEBA-1/);
 
@@ -270,7 +319,7 @@ describe('DocumentGeneratorService', () => {
     const xmlConRelacion = new PizZip(await resultadoConRelacion.arrayBuffer())
       .file('word/document.xml')
       ?.asText();
-    expect(xmlConRelacion).toContain('Prueba|||||||ID-ELECTRONICO-1|Alex y Sam');
+    expect(xmlConRelacion).toMatch(/Alex\|Ejemplo\|Prueba(?:\|){8}ID-ELECTRONICO-1/);
     expect(xmlConRelacion).not.toContain('ACTA-PRUEBA-1');
   });
 
@@ -290,7 +339,7 @@ describe('DocumentGeneratorService', () => {
 
   it('replaces every populated field from the provided pension and divorce questionnaires', async () => {
     const template = createTemplateFile(
-      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{demandado.ingresosMensuales}}|{{demandado.nombreEmpresa}}|{{demandado.domicilioEmpresa}}|{{hijos.0.nombre}}|{{hijos.0.edad}}|{{hijos.0.escolaridad}}|{{hijos.0.identificadorElectronicoNacimiento}}</w:t></w:r></w:p><w:p><w:r><w:t>{{datosDivorcio.domicilioConyugal}}|{{datosDivorcio.duracionSeparacion}}|{{datosDivorcio.hijasHijosVivenCon}}|{{datosDivorcio.embarazoDemandado}}|{{datosDivorcio.dedicacionHogarCuidado}}</w:t></w:r></w:p><w:p><w:r><w:t>{{abogado.fechaRecepcionPapeleria}}|{{abogado.nombreReceptora}}</w:t></w:r></w:p><w:sectPr/></w:body></w:document>',
+      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>{{demandado.ingresosMensuales}}|{{demandado.nombreEmpresa}}|{{demandado.domicilioEmpresa}}|{{hijos.0.nombre}}|{{hijos.0.edad}}|{{hijos.0.escolaridad}}|{{hijos.0.identificadorElectronicoNacimiento}}</w:t></w:r></w:p><w:p><w:r><w:t>{{datosDivorcio.domicilioConyugal}}|{{datosDivorcio.duracionSeparacion}}|{{datosDivorcio.hijasHijosVivenCon}}|{{datosDivorcio.embarazoDemandado}}|{{datosDivorcio.dedicacionHogarCuidado}}</w:t></w:r></w:p><w:p><w:r><w:t>{{abogado.fechaRecepcionPapeleria}}|{{abogado.nombreReceptora}}</w:t></w:r></w:p><w:p><w:r><w:t>{{hijos.resumenEscolaridad}}|{{pruebasPension.numeroComprobantesDomicilio}}|{{pruebasPension.numeroTicketsGastos}}|{{pruebasPension.numeroActuacionesLaboral}}|{{pruebasPension.numeroPresuncionalLaboral}}</w:t></w:r></w:p><w:p><w:r><w:t>{{gastos.total}}</w:t></w:r></w:p><w:sectPr/></w:body></w:document>',
     );
 
     const result = await service.generateDocument(template, caso);
@@ -301,8 +350,13 @@ describe('DocumentGeneratorService', () => {
     expect(generatedXml).toContain('Domicilio de prueba');
     expect(generatedXml).toContain('Alex Ejemplo|8|Primaria|ID-ELECTRONICO-1');
     expect(generatedXml).toContain(
+      'Alex Ejemplo, de 8 años y con escolaridad de Primaria y Sam Ejemplo, de 5 años y con escolaridad de Preescolar',
+    );
+    expect(generatedXml).toContain('III|IV|V|VI');
+    expect(generatedXml).toContain(
       '3 años|La parte promovente|No aplica|Dedicación compartida de prueba',
     );
+    expect(generatedXml).toContain('8050');
     const fechaRecepcion = new Date('2026-09-30T12:00:00').toLocaleDateString('es-MX');
     expect(generatedXml).toContain(`${fechaRecepcion}|Lic. Prueba`);
     expect(generatedXml).not.toContain('{{');
